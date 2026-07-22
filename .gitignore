@@ -1,7 +1,9 @@
 node_modules/
 dist/
+dist-check/
 .angular/
 target/
 .idea/
 *.iml
 *.log
+*.zip
