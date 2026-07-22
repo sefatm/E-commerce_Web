@@ -1,0 +1,78 @@
+<div class="report-page">
+
+  <div class="page-header no-print">
+    <div>
+      <h2>Revenue Report</h2>
+      <p>Monthly revenue trend and growth analysis.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="exportCsv()" [disabled]="!report">Export CSV</button>
+      <button class="btn btn-outline" (click)="printReport()" [disabled]="!report">Print</button>
+    </div>
+  </div>
+
+  <div class="alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="loading-state" *ngIf="isLoading">Loading revenue data...</div>
+
+  <ng-container *ngIf="report && !isLoading">
+
+    <div class="kpi-row">
+      <div class="kpi-card kpi-green">
+        <div class="kpi-val">&#x09F3;{{ report.totalRevenue | number:'1.0-0' }}</div>
+        <div class="kpi-label">All-time Revenue</div>
+      </div>
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-val">&#x09F3;{{ report.revenueThisMonth | number:'1.0-0' }}</div>
+        <div class="kpi-label">This Month</div>
+      </div>
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-val">&#x09F3;{{ report.revenueLastMonth | number:'1.0-0' }}</div>
+        <div class="kpi-label">Last Month</div>
+      </div>
+      <div class="kpi-card" [ngClass]="getGrowthClass()">
+        <div class="kpi-val">{{ report.growthPercent >= 0 ? '+' : '' }}{{ report.growthPercent | number:'1.1-1' }}%</div>
+        <div class="kpi-label">Month-over-Month</div>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <h3>Monthly Revenue (Last {{ report.monthly.length }} Months)</h3>
+      <div class="bar-chart">
+        <div class="bar-group" *ngFor="let m of report.monthly">
+          <div class="bar-col">
+            <div class="bar-tooltip">&#x09F3;{{ m.totalRevenue | number:'1.0-0' }}</div>
+            <div class="bar-fill" [style.height.px]="getBarHeight(m.totalRevenue)"></div>
+          </div>
+          <div class="bar-label">{{ m.month }}</div>
+          <div class="bar-count">{{ m.orderCount }} orders</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <h3>Monthly Breakdown</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Month</th>
+            <th>Orders</th>
+            <th>Revenue</th>
+            <th>Avg/Order</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of report.monthly; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td><strong>{{ m.month }}</strong></td>
+            <td>{{ m.orderCount }}</td>
+            <td><strong>&#x09F3;{{ m.totalRevenue | number:'1.2-2' }}</strong></td>
+            <td>&#x09F3;{{ (m.orderCount > 0 ? m.totalRevenue / m.orderCount : 0) | number:'1.0-0' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+
+</div>

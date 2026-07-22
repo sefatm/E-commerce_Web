@@ -1,0 +1,108 @@
+<div class="list-page">
+
+  <div class="page-header">
+    <div>
+      <h2>👥 Customer List</h2>
+      <p>{{ filteredCustomers.length }} of {{ getTotalCount() }} customers</p>
+    </div>
+    <!-- ✅ FIX #15: routerLink ছিল '/customers/create' — সঠিক admin path -->
+    <button class="btn btn-primary" routerLink="/admin/customers/add">➕ Add Customer</button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMsg">✅ {{ successMsg }}</div>
+  <div class="alert alert-error"   *ngIf="errorMsg">❌ {{ errorMsg }}</div>
+
+  <!-- Summary Cards -->
+  <div class="summary-row">
+    <div class="sum-card">
+      <div class="sum-icon">👥</div>
+      <div class="sum-label">Total Customers</div>
+      <div class="sum-val">{{ getTotalCount() }}</div>
+    </div>
+    <div class="sum-card sum-green">
+      <div class="sum-icon">✅</div>
+      <div class="sum-label">Active</div>
+      <div class="sum-val">{{ getActiveCount() }}</div>
+    </div>
+    <div class="sum-card sum-gold">
+      <div class="sum-icon">⭐</div>
+      <div class="sum-label">VIP</div>
+      <div class="sum-val">{{ getVipCount() }}</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" placeholder="Search by name, email or phone..."
+        [(ngModel)]="searchKeyword" (input)="applyFilter()">
+    </div>
+    <div class="tab-group">
+      <button [class.active]="selectedType === 'ALL'"     (click)="selectedType='ALL'; applyFilter()">All</button>
+      <button [class.active]="selectedType === 'regular'" (click)="selectedType='regular'; applyFilter()">Regular</button>
+      <button [class.active]="selectedType === 'vip'"     (click)="selectedType='vip'; applyFilter()">⭐ VIP</button>
+    </div>
+    <div class="tab-group">
+      <button [class.active]="selectedStatus === 'ALL'"      (click)="selectedStatus='ALL'; applyFilter()">All Status</button>
+      <button [class.active]="selectedStatus === 'active'"   (click)="selectedStatus='active'; applyFilter()">Active</button>
+      <button [class.active]="selectedStatus === 'inactive'" (click)="selectedStatus='inactive'; applyFilter()">Inactive</button>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">⏳ Loading customers...</div>
+
+  <!-- Table -->
+  <div class="table-card" *ngIf="!isLoading">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>District</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filteredCustomers; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td><strong>{{ c.name }}</strong></td>
+            <td>{{ c.email }}</td>
+            <td>{{ c.phone }}</td>
+            <td>{{ c.district || '—' }}</td>
+            <td>
+              <span class="type-badge" [class.vip]="c.type === 'vip'">
+                {{ c.type === 'vip' ? '⭐ VIP' : 'Regular' }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge"
+                [class.active]="c.status === 'active'"
+                [class.inactive]="c.status !== 'active'">
+                {{ c.status }}
+              </span>
+            </td>
+            <td class="actions">
+              <!-- ✅ FIX #16: Edit routerLink ছিল '/customers/edit/:id'
+                   এই route routing module এ নেই — /admin/customers/add এ পাঠানো হচ্ছে
+                   (পরে edit page আলাদাভাবে বানাতে হবে) -->
+              <button class="btn-icon btn-edit" title="Edit"
+                routerLink="/admin/customers/add">✏️</button>
+              <button class="btn-icon btn-delete" title="Delete"
+                (click)="deleteCustomer(c.id!)">🗑️</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredCustomers.length === 0">
+            <td colspan="8" class="empty">No customers found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

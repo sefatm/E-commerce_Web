@@ -1,0 +1,37 @@
+<div class="cart-overlay" *ngIf="isModalOpen" (click)="closeCart()"></div>
+
+<div class="cart-container" [class.open]="isModalOpen">
+  <div class="cart-header">
+    <div>
+      <p class="cart-eyebrow">Rural Mart checkout</p>
+      <h2>Shopping Cart ({{ cartService.getCartCount() }})</h2>
+    </div>
+    <button type="button" class="close-btn" (click)="closeCart()">x</button>
+  </div>
+
+  <div class="cart-body">
+    <div *ngIf="cartItems.length === 0" class="empty-cart">
+      Your cart is empty.
+    </div>
+
+    <div *ngFor="let item of cartItems" class="cart-item">
+      <img [src]="imageUrl(item.image)" [alt]="item.name || 'Cart item'" (error)="img.src = placeholder" #img>
+      <div class="item-details">
+        <h4>{{ item.name }}</h4>
+        <p>&#x09F3;{{ cartService.getEffectivePrice(item) | number:'1.0-0' }} x {{ item.quantity }}</p>
+        <strong class="line-total">&#x09F3;{{ cartService.getEffectivePrice(item) * item.quantity | number:'1.0-0' }}</strong>
+      </div>
+      <div class="item-actions">
+        <button type="button" aria-label="Decrease quantity" (click)="cartService.decreaseQuantity(item.id)">-</button>
+        <span>{{ item.quantity }}</span>
+        <button type="button" aria-label="Increase quantity" (click)="cartService.addToCart(item)">+</button>
+        <button type="button" class="remove-btn" (click)="cartService.removeFromCart(item.id)">Remove</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cart-footer" *ngIf="cartItems.length > 0">
+    <h3>Total: &#x09F3;{{ totalPrice | number:'1.0-0' }}</h3>
+    <button class="checkout-btn" (click)="goToCheckout()">Proceed to Checkout</button>
+  </div>
+</div>

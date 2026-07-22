@@ -1,0 +1,25 @@
+Rural Mart Frontend Structure
+
+src/app
+├── core
+│   ├── guards              # AuthGuard / AdminGuard
+│   ├── interceptors        # JWT token interceptor
+│   ├── models              # TypeScript interfaces and DTO models
+│   └── services            # API, cart, auth, product, order, seller services
+├── shared
+│   ├── components          # Reusable store components: header, product card, cart modal
+│   └── layout              # Admin/Seller layout: sidebar, navbar, footer, main layout
+├── features
+│   ├── store               # Public/customer pages: home, login, register, checkout, profile
+│   └── admin               # Admin and seller panels: dashboard, products, orders, reports, settings
+├── app-routing.module.ts
+├── app.module.ts
+└── app.component.*
+
+Clean-up notes:
+- Removed old duplicate vendor page folder and kept Seller Center as the single seller/vendor workflow.
+- Replaced all old old brand naming with Rural Mart / RM.
+- Moved services and models into core for cleaner imports.
+- Moved common UI into shared.
+- Moved customer-facing pages into features/store.
+- Moved admin/seller management modules into features/admin.

@@ -1,0 +1,114 @@
+<div class="analytics-page">
+
+  <div class="page-header">
+    <h2>Order Analytics</h2>
+    <p>Overview of sales and order performance.</p>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">Loading analytics...</div>
+
+  <ng-container *ngIf="analytics && !isLoading">
+
+    <div class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon">BOX</div>
+        <div class="kpi-val">{{ analytics.totalOrders }}</div>
+        <div class="kpi-label">Total Orders</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-icon">BDT</div>
+        <div class="kpi-val">৳{{ analytics.totalRevenue | number:'1.0-0' }}</div>
+        <div class="kpi-label">Total Revenue</div>
+      </div>
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-icon">MON</div>
+        <div class="kpi-val">৳{{ analytics.revenueThisMonth | number:'1.0-0' }}</div>
+        <div class="kpi-label">This Month</div>
+      </div>
+      <div class="kpi-card kpi-teal">
+        <div class="kpi-icon">OK</div>
+        <div class="kpi-val">{{ getDeliveryRate() }}%</div>
+        <div class="kpi-label">Delivery Rate</div>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <div class="chart-card">
+        <h3>Order Status Breakdown</h3>
+        <div class="status-list">
+          <div class="status-item">
+            <div class="status-dot dot-pending"></div>
+            <span class="status-name">Pending</span>
+            <span class="status-count">{{ analytics.pendingOrders }}</span>
+            <div class="status-bar-wrap">
+              <div class="status-bar bar-pending" [style.width.%]="getStatusPercent(analytics.pendingOrders)"></div>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-dot dot-accepted"></div>
+            <span class="status-name">Accepted</span>
+            <span class="status-count">{{ analytics.acceptedOrders || 0 }}</span>
+            <div class="status-bar-wrap">
+              <div class="status-bar bar-accepted" [style.width.%]="getStatusPercent(analytics.acceptedOrders || 0)"></div>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-dot dot-processing"></div>
+            <span class="status-name">Processing</span>
+            <span class="status-count">{{ analytics.processingOrders }}</span>
+            <div class="status-bar-wrap">
+              <div class="status-bar bar-processing" [style.width.%]="getStatusPercent(analytics.processingOrders)"></div>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-dot dot-shipped"></div>
+            <span class="status-name">Shipped</span>
+            <span class="status-count">{{ analytics.shippedOrders }}</span>
+            <div class="status-bar-wrap">
+              <div class="status-bar bar-shipped" [style.width.%]="getStatusPercent(analytics.shippedOrders)"></div>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-dot dot-delivered"></div>
+            <span class="status-name">Delivered</span>
+            <span class="status-count">{{ analytics.deliveredOrders }}</span>
+            <div class="status-bar-wrap">
+              <div class="status-bar bar-delivered" [style.width.%]="getStatusPercent(analytics.deliveredOrders)"></div>
+            </div>
+          </div>
+
+          <div class="status-item">
+            <div class="status-dot dot-cancelled"></div>
+            <span class="status-name">Cancelled</span>
+            <span class="status-count">{{ analytics.cancelledOrders }}</span>
+            <div class="status-bar-wrap">
+              <div class="status-bar bar-cancelled" [style.width.%]="getStatusPercent(analytics.cancelledOrders)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>Monthly Revenue (Last 6 Months)</h3>
+        <div class="bar-chart" *ngIf="analytics.monthlyRevenue?.length; else noData">
+          <div class="bar-group" *ngFor="let m of analytics.monthlyRevenue">
+            <div class="bar-col">
+              <div class="bar-tooltip">৳{{ m[1] | number:'1.0-0' }}</div>
+              <div class="bar-fill" [style.height.px]="getBarHeight(m[1])"></div>
+            </div>
+            <div class="bar-label">{{ getMonthLabel(m[0]) }}</div>
+          </div>
+        </div>
+        <ng-template #noData>
+          <div class="no-data">No revenue data available yet.</div>
+        </ng-template>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

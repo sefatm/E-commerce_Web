@@ -1,0 +1,20 @@
+export interface Seller {
+  id?: number;
+  name: string;
+  shopName?: string;
+  user?: any;
+  nidNo?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  district?: string;
+  artisanStory?: string;
+  craftProcess?: string;
+  verified?: boolean;
+  rating?: number;
+  reviewCount?: number;
+  commissionRate?: number;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+  rejectionReason?: string;
+  createdAt?: string;
+}

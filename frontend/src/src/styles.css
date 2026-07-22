@@ -1,0 +1,527 @@
+/* Rural Mart enterprise ecommerce UI theme */
+:root {
+  --rural-mart-bg: #ffffff;
+  --rural-mart-surface: #ffffff;
+  --rural-mart-surface-soft: #f8fafc;
+  --rural-mart-surface-tint: #f5f8ff;
+  --rural-mart-border: #e5eaf3;
+  --rural-mart-border-strong: #ccd6e5;
+  --rural-mart-text: #07142f;
+  --rural-mart-muted: #64748b;
+  --rural-mart-soft: #91a1ba;
+  --rural-mart-primary: #0f7a38;
+  --rural-mart-primary-dark: #063d1e;
+  --rural-mart-primary-soft: #eefcf3;
+  --rural-mart-accent: #16a34a;
+  --rural-mart-accent-dark: #0f7a38;
+  --rural-mart-accent-soft: #ecfdf5;
+  --rural-mart-purple: #8b5cf6;
+  --rural-mart-orange: #f97316;
+  --rural-mart-danger: #dc2626;
+  --rural-mart-warning: #d97706;
+  --rural-mart-radius: 14px;
+  --rural-mart-radius-lg: 20px;
+  --rural-mart-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+  --rural-mart-shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.055);
+  --rural-mart-shadow-hover: 0 22px 50px rgba(15, 23, 42, 0.11);
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #ffffff;
+  color: var(--rural-mart-text);
+  font-family: "DM Sans", "Inter", "Segoe UI", Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+.disabled {
+  cursor: not-allowed !important;
+  opacity: 0.62;
+}
+
+/* Shared admin/customer page polish */
+.page-wrapper,
+.dashboard,
+.settings-page,
+.customer-form-page,
+.report-page,
+.seller-dashboard,
+.checkout-container,
+.profile-page,
+.wishlist-page,
+.seller-apply-page,
+.home-page {
+  background: #fff !important;
+  color: var(--rural-mart-text);
+}
+
+.page-title,
+.panel-title,
+.card-title,
+.section-title,
+.vm-title {
+  letter-spacing: 0;
+  color: var(--rural-mart-text);
+}
+
+.page-title {
+  font-weight: 850 !important;
+  line-height: 1.15;
+}
+
+.page-sub,
+.page-subtitle,
+.panel-sub,
+.card-sub {
+  color: var(--rural-mart-muted) !important;
+}
+
+.form-card,
+.table-card,
+.chart-card,
+.mini-card,
+.settings-content,
+.settings-sidebar,
+.payment-card,
+.review-card,
+.profile-card,
+.order-summary,
+.checkout-form {
+  background: var(--rural-mart-surface) !important;
+  border: 1px solid var(--rural-mart-border) !important;
+  border-radius: var(--rural-mart-radius-lg) !important;
+  box-shadow: var(--rural-mart-shadow-soft) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.form-card:hover,
+.table-card:hover,
+.chart-card:hover,
+.mini-card:hover,
+.settings-content:hover,
+.settings-sidebar:hover,
+.payment-card:hover,
+.review-card:hover,
+.profile-card:hover,
+.order-summary:hover,
+.checkout-form:hover {
+  border-color: #d7e2f0 !important;
+  box-shadow: var(--rural-mart-shadow-hover) !important;
+}
+
+.toolbar,
+.filter-bar,
+.page-header {
+  background: #fff !important;
+  border-color: var(--rural-mart-border) !important;
+  border-radius: var(--rural-mart-radius-lg) !important;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.045);
+}
+
+.card-head,
+.panel-head,
+.section-head,
+.modal-head {
+  border-bottom-color: var(--rural-mart-border) !important;
+}
+
+.form-group {
+  position: relative;
+}
+
+.form-label,
+label {
+  color: #334155;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.form-input,
+.form-control,
+.form-select,
+.search-input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="file"],
+select,
+textarea {
+  min-height: 46px;
+  border: 1px solid var(--rural-mart-border-strong) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%) !important;
+  color: var(--rural-mart-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+textarea,
+textarea.form-input {
+  min-height: 112px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9aa8bd !important;
+}
+
+.form-input:focus,
+.form-control:focus,
+.form-select:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--rural-mart-primary) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(15, 122, 56, 0.12), 0 10px 24px rgba(15, 122, 56, 0.08) !important;
+  outline: none !important;
+}
+
+.input-icon-wrap {
+  position: relative;
+}
+
+.input-prefix {
+  color: var(--rural-mart-muted) !important;
+  font-weight: 800;
+}
+
+.has-prefix {
+  padding-left: 42px !important;
+}
+
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border-color: #fb7185 !important;
+  box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.09) !important;
+}
+
+.btn-primary,
+.btn-save,
+.submit-btn,
+.save,
+.btn-place-order,
+.btn-track,
+.vm-edit-btn,
+.add-btn,
+.save-btn,
+.cart-btn,
+.add-to-cart-btn {
+  background: linear-gradient(135deg, var(--rural-mart-primary), #6d5dfc) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 14px 26px rgba(37, 99, 235, 0.22) !important;
+  font-weight: 800 !important;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease !important;
+}
+
+.btn-primary:hover,
+.btn-save:hover,
+.submit-btn:hover,
+.save:hover,
+.btn-place-order:hover,
+.btn-track:hover,
+.vm-edit-btn:hover,
+.add-btn:hover,
+.save-btn:hover,
+.cart-btn:hover,
+.add-to-cart-btn:hover {
+  background: linear-gradient(135deg, var(--rural-mart-primary-dark), #5947df) !important;
+  box-shadow: 0 18px 34px rgba(37, 99, 235, 0.28) !important;
+  transform: translateY(-1px);
+  filter: none !important;
+}
+
+.btn-outline,
+.ghost-btn,
+.btn-continue,
+.vm-cancel-btn,
+.btn-cancel-return,
+.back-btn,
+.btn-outline-sm {
+  background: #fff !important;
+  color: var(--rural-mart-text) !important;
+  border: 1px solid var(--rural-mart-border-strong) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.045) !important;
+  font-weight: 750 !important;
+}
+
+.btn-outline:hover,
+.ghost-btn:hover,
+.btn-continue:hover,
+.vm-cancel-btn:hover,
+.btn-cancel-return:hover,
+.back-btn:hover,
+.btn-outline-sm:hover {
+  border-color: var(--rural-mart-primary) !important;
+  color: var(--rural-mart-primary-dark) !important;
+  background: var(--rural-mart-primary-soft) !important;
+}
+
+.btn-danger,
+.btn-danger-sm,
+.remove-btn,
+.delete-btn,
+.btn-delete {
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border: 1px solid #fecdd3 !important;
+  border-radius: 12px !important;
+  font-weight: 750 !important;
+}
+
+.btn-danger:hover,
+.btn-danger-sm:hover,
+.remove-btn:hover,
+.delete-btn:hover,
+.btn-delete:hover {
+  background: #ffe4e6 !important;
+  border-color: #fda4af !important;
+}
+
+.alert,
+.alert-success,
+.alert-error,
+.success,
+.error {
+  border-radius: 14px !important;
+  border: 1px solid transparent;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.alert-success,
+.alert.success,
+.success {
+  background: var(--rural-mart-accent-soft) !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.alert-error,
+.alert.error,
+.error {
+  background: #fff1f2 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+.status-badge,
+.approval-badge,
+.category-tag,
+.stock-badge,
+.count-badge,
+.status-pill {
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0;
+}
+
+.data-table th {
+  background: var(--rural-mart-surface-soft) !important;
+  color: var(--rural-mart-muted) !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.35px;
+}
+
+.data-table tbody tr:hover {
+  background: #f8fbff !important;
+}
+
+/* Enterprise ecommerce public/admin surfaces */
+.site-header,
+.navbar,
+.category-nav,
+.hero-section,
+.product-card,
+.cart-modal,
+.modal,
+.view-modal,
+.order-card,
+.wishlist-card,
+.seller-card,
+.summary-card {
+  background: #fff !important;
+  border-color: var(--rural-mart-border) !important;
+  box-shadow: var(--rural-mart-shadow-soft) !important;
+  border-radius: var(--rural-mart-radius-lg) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.product-card:hover,
+.order-card:hover,
+.wishlist-card:hover,
+.seller-card:hover,
+.summary-card:hover {
+  border-color: #d6e2f2 !important;
+  box-shadow: var(--rural-mart-shadow-hover) !important;
+  transform: translateY(-2px);
+}
+
+.category-nav {
+  border-bottom: 1px solid var(--rural-mart-border) !important;
+}
+
+.category-nav button,
+.filter-tab,
+.status-tabs button,
+.tab,
+.chip,
+.category-chip {
+  border-radius: 999px !important;
+  border: 1px solid var(--rural-mart-border) !important;
+  background: #ffffff !important;
+  color: #42526d !important;
+  font-weight: 800 !important;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+
+.category-nav button:hover,
+.filter-tab:hover,
+.status-tabs button:hover,
+.tab:hover,
+.chip:hover,
+.category-chip:hover {
+  background: var(--rural-mart-primary-soft) !important;
+  border-color: #bfdbfe !important;
+  color: var(--rural-mart-primary-dark) !important;
+  transform: translateY(-1px);
+}
+
+.category-nav button.active,
+.filter-tab.active,
+.status-tabs button.active,
+.tab.active,
+.chip.active,
+.category-chip.active {
+  background: linear-gradient(135deg, var(--rural-mart-primary), var(--rural-mart-purple)) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+}
+
+.kpi-card,
+.stat-card,
+.metric-card {
+  border-radius: var(--rural-mart-radius-lg) !important;
+  border: 1px solid var(--rural-mart-border) !important;
+  box-shadow: var(--rural-mart-shadow-soft) !important;
+}
+
+.modal,
+.view-modal,
+.cart-modal {
+  border-radius: 20px !important;
+  box-shadow: 0 30px 80px rgba(2, 8, 23, 0.22) !important;
+}
+
+.modal-overlay,
+.overlay,
+.view-modal-backdrop {
+  backdrop-filter: blur(5px);
+  background: rgba(7, 20, 47, 0.42) !important;
+}
+
+.badge,
+.tag,
+.pill,
+.status,
+.status-pill {
+  border-radius: 999px !important;
+}
+
+a {
+  color: inherit;
+}
+
+@media (max-width: 768px) {
+  .page-header,
+  .toolbar,
+  .filter-bar {
+    border-radius: 16px !important;
+  }
+
+  .form-card,
+  .table-card,
+  .chart-card,
+  .mini-card,
+  .payment-card,
+  .review-card,
+  .profile-card,
+  .order-summary,
+  .checkout-form {
+    border-radius: 16px !important;
+  }
+
+  .form-input,
+  .form-control,
+  .form-select,
+  input,
+  select,
+  textarea {
+    font-size: 15px;
+  }
+}
+
+@media print {
+  app-navbar,
+  app-sidebar,
+  app-footer,
+  .navbar,
+  .sidebar,
+  .nav-overlay,
+  .no-print {
+    display: none !important;
+  }
+
+  .layout,
+  .main-content,
+  .main-content.sidebar-collapsed,
+  .page-content {
+    display: block !important;
+    width: 100% !important;
+    min-height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  body {
+    background: #fff !important;
+  }
+}

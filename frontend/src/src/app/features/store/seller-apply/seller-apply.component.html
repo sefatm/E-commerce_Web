@@ -1,0 +1,153 @@
+<app-site-header></app-site-header>
+
+<div class="seller-apply-page">
+  <section class="apply-shell">
+    <aside class="apply-intro">
+      <p class="eyebrow">Seller onboarding</p>
+      <h1>Apply to Become a Rural Mart Seller</h1>
+      <p>Login as a customer first, then submit your shop, NID and product details. Admin approval is required before you can sell products.</p>
+
+      <div class="intro-steps">
+        <div><b>1</b><span>Customer Login</span></div>
+        <div><b>2</b><span>Submit Seller Details</span></div>
+        <div><b>3</b><span>Admin Approval</span></div>
+      </div>
+    </aside>
+
+    <form class="apply-form" [formGroup]="sellerForm" (ngSubmit)="submit()">
+      <div class="form-title">
+        <span>Seller / Vendor Request</span>
+        <h2>Business Information</h2>
+      </div>
+
+      <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+      <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <div class="form-grid">
+        <label>
+          <span>Full name *</span>
+          <input formControlName="name" type="text" placeholder="Your full name">
+          <small *ngIf="submitted && f['name'].errors">Name is required.</small>
+        </label>
+
+        <label>
+          <span>Shop / Farm name *</span>
+          <input formControlName="shopName" type="text" placeholder="Example: Green Agro Farm">
+          <small *ngIf="submitted && f['shopName'].errors">Shop name is required.</small>
+        </label>
+
+        <label>
+          <span>Email *</span>
+          <input formControlName="email" type="email" placeholder="seller@example.com">
+          <small *ngIf="submitted && f['email'].errors">Valid email is required.</small>
+        </label>
+
+        <label>
+          <span>Phone *</span>
+          <input formControlName="phone" type="text" placeholder="01XXXXXXXXX">
+          <small *ngIf="submitted && f['phone'].errors">Phone is required.</small>
+        </label>
+
+        <label>
+          <span>NID number *</span>
+          <input formControlName="nidNo" type="text" placeholder="10/13/17 digit NID">
+          <small *ngIf="submitted && f['nidNo'].errors">Valid NID number is required.</small>
+        </label>
+
+        <label>
+          <span>District / Area *</span>
+          <input formControlName="district" type="text" placeholder="Dhaka / Madaripur / etc.">
+          <small *ngIf="submitted && f['district'].errors">District is required.</small>
+        </label>
+
+        <label>
+          <span>Business type *</span>
+          <select formControlName="businessType">
+            <option>Individual Seller</option>
+            <option>Farmer / Producer</option>
+            <option>Rural Artisan</option>
+            <option>Small Shop / Supplier</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Main product category *</span>
+          <select formControlName="productCategory">
+            <option value="">Select category</option>
+            <option>Fresh Vegetables</option>
+            <option>Fresh Fruits</option>
+            <option>Rice & Grains</option>
+            <option>Dairy & Eggs</option>
+            <option>Organic Products</option>
+            <option>Handmade Products</option>
+            <option>Home & Kitchen</option>
+          </select>
+          <small *ngIf="submitted && f['productCategory'].errors">Category is required.</small>
+        </label>
+
+        <label class="full">
+          <span>Full address *</span>
+          <input formControlName="address" type="text" placeholder="Village/Road, Upazila, District">
+          <small *ngIf="submitted && f['address'].errors">Address is required.</small>
+        </label>
+
+        <label>
+          <span>Payment method</span>
+          <select formControlName="paymentMethod">
+            <option>bKash</option>
+            <option>Nagad</option>
+            <option>Rocket</option>
+            <option>Bank Account</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Payment number/account *</span>
+          <input formControlName="paymentNumber" type="text" placeholder="Payment number/account">
+          <small *ngIf="submitted && f['paymentNumber'].errors">Payment number is required.</small>
+        </label>
+
+        <div class="upload-grid full">
+          <label class="upload-box">
+            <span>Profile / Seller photo *</span>
+            <input type="file" accept="image/png,image/jpeg,image/jpg" (change)="onFileChange($event, 'profile')">
+            <b>{{ profilePhotoName || 'Upload seller photo' }}</b>
+            <small *ngIf="submitted && !profilePhotoFile">Profile photo is required.</small>
+          </label>
+
+          <label class="upload-box">
+            <span>NID front photo *</span>
+            <input type="file" accept="image/png,image/jpeg,image/jpg,application/pdf" (change)="onFileChange($event, 'nidFront')">
+            <b>{{ nidFrontName || 'Upload NID front' }}</b>
+            <small *ngIf="submitted && !nidFrontFile">NID front is required.</small>
+          </label>
+
+          <label class="upload-box">
+            <span>NID back photo</span>
+            <input type="file" accept="image/png,image/jpeg,image/jpg,application/pdf" (change)="onFileChange($event, 'nidBack')">
+            <b>{{ nidBackName || 'Upload NID back' }}</b>
+          </label>
+        </div>
+
+        <label class="full">
+          <span>Seller / product story *</span>
+          <textarea formControlName="artisanStory" rows="4" placeholder="Tell us about your products, farming, sourcing or craft background."></textarea>
+          <small *ngIf="submitted && f['artisanStory'].errors">Write at least 20 characters.</small>
+        </label>
+
+        <label class="full">
+          <span>Product preparation / delivery process *</span>
+          <textarea formControlName="craftProcess" rows="4" placeholder="Describe how you prepare, pack and deliver products."></textarea>
+          <small *ngIf="submitted && f['craftProcess'].errors">Write at least 20 characters.</small>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="ghost-btn" routerLink="/">Cancel</button>
+        <button type="submit" class="submit-btn" [disabled]="isLoading">
+          {{ isLoading ? 'Submitting...' : 'Submit Seller Application' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

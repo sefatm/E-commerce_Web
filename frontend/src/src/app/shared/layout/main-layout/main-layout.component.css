@@ -1,0 +1,35 @@
+.layout {
+  display: flex;
+}
+
+/* Main Content (shifts right by sidebar width) */
+.main-content {
+  margin-left: 248px;
+  width: calc(100% - 248px);
+  background: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Collapsed sidebar state */
+.main-content.sidebar-collapsed {
+  margin-left: 68px;
+  width: calc(100% - 68px);
+}
+
+/* Page Content Padding */
+.page-content {
+  padding: 22px 26px;
+  flex: 1;
+  background: #fff;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}

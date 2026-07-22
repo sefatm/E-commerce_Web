@@ -1,0 +1,19 @@
+<div class="layout">
+
+  <!-- Sidebar -->
+  <app-sidebar></app-sidebar>
+
+  <!-- Main Content -->
+  <div class="main-content" [class.sidebar-collapsed]="sidebarCollapsed">
+
+    <!-- Navbar -->
+    <app-navbar></app-navbar>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <router-outlet></router-outlet>
+    </div>
+      <app-footer></app-footer>
+  </div>
+  
+</div>

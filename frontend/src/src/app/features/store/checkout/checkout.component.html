@@ -1,0 +1,157 @@
+<app-site-header></app-site-header>
+
+<!-- Redirecting to payment gateway -->
+<div class="checkout-redirect-overlay" *ngIf="isRedirectingToPayment">
+  <div class="checkout-redirect-box">
+    <i class="fa-solid fa-spinner fa-spin"></i>
+    <h3>Redirecting to payment gateway...</h3>
+    <p>Please wait, do not close this page.</p>
+  </div>
+</div>
+
+<!-- Payment fallback message (gateway unavailable) -->
+<div class="checkout-alert checkout-alert-error" *ngIf="paymentError">
+  <div>
+    <h3>Online payment unavailable</h3>
+    <p>{{ paymentError }}</p>
+  </div>
+</div>
+
+<div
+  class="checkout-alert"
+  *ngIf="orderMessage"
+  [class.checkout-alert-success]="orderMessageType === 'success'"
+  [class.checkout-alert-error]="orderMessageType === 'error'">
+  <div>
+    <h3>{{ orderMessageType === 'success' ? 'Order placed successfully' : 'Checkout needs attention' }}</h3>
+    <p>{{ orderMessage }}</p>
+  </div>
+  <div class="checkout-alert-actions" *ngIf="orderMessageType === 'success'">
+    <button
+      type="button"
+      class="btn-track"
+      routerLink="/my-orders"
+      [queryParams]="firstPlacedOrderCode ? { code: firstPlacedOrderCode } : null">
+      Track Order
+    </button>
+    <button type="button" class="btn-continue" routerLink="/">Continue Shopping</button>
+  </div>
+</div>
+
+<div class="checkout-container">
+  <div class="checkout-form">
+    <h2>Shipping Details</h2>
+    <form #shipForm="ngForm" (ngSubmit)="placeOrder(shipForm)">
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="name" [(ngModel)]="shippingInfo.name" required placeholder="Your full name">
+      </div>
+
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" name="address" [(ngModel)]="shippingInfo.address" required placeholder="Delivery address">
+      </div>
+
+      <div class="form-group">
+        <label>Phone</label>
+        <input type="text" name="phone" [(ngModel)]="shippingInfo.phone" required placeholder="01XXXXXXXXX">
+      </div>
+
+      <div class="form-group">
+        <label>Payment Method</label>
+        <select name="payment" [(ngModel)]="shippingInfo.payment">
+          <option value="cod">Cash on Delivery</option>
+          <option value="bkash">bKash</option>
+          <option value="nagad">Nagad</option>
+        </select>
+      </div>
+
+      <div class="coupon-section">
+        <h3>Have a Coupon?</h3>
+
+        <div class="coupon-input-row" *ngIf="!couponApplied">
+          <input
+            type="text"
+            [(ngModel)]="couponCode"
+            name="couponCode"
+            placeholder="Enter coupon code"
+            class="coupon-input"
+            [ngModelOptions]="{standalone: true}"
+            (keyup.enter)="applyCoupon()"
+            [disabled]="isValidating">
+          <button type="button" class="btn-apply" (click)="applyCoupon()" [disabled]="isValidating || totalPrice <= 0">
+            {{ isValidating ? 'Checking...' : 'Apply' }}
+          </button>
+        </div>
+
+        <div class="coupon-applied-tag" *ngIf="couponApplied">
+          <span><strong>{{ couponCode }}</strong> applied</span>
+          <button type="button" class="btn-remove-coupon" (click)="removeCoupon()">Remove</button>
+        </div>
+
+        <div class="coupon-message"
+          *ngIf="couponMessage"
+          [class.coupon-success]="couponMessageType === 'success'"
+          [class.coupon-error]="couponMessageType === 'error'">
+          {{ couponMessage }}
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn-place-order"
+        [disabled]="isPlacingOrder || isRedirectingToPayment || shipForm.invalid || cartItems.length === 0">
+        {{ isPlacingOrder ? 'Placing order...' :
+           (shippingInfo.payment === 'bkash' || shippingInfo.payment === 'nagad')
+             ? 'Place Order & Pay Online'
+             : 'Place Order' }} - &#x09F3;{{ finalTotal | number:'1.2-2' }}
+      </button>
+
+    </form>
+  </div>
+
+  <div class="order-summary">
+    <h2>Order Summary</h2>
+
+    <div class="summary-items">
+      <div *ngFor="let item of cartItems" class="summary-item">
+        <span class="item-name">{{ item.name }} <small>x{{ item.quantity }}</small></span>
+        <span class="item-price">&#x09F3;{{ itemLineTotal(item) | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="summary-empty" *ngIf="cartItems.length === 0">
+      Your cart is empty.
+    </div>
+
+    <hr>
+
+    <div class="summary-row">
+      <span>Subtotal</span>
+      <span>&#x09F3;{{ totalPrice | number:'1.2-2' }}</span>
+    </div>
+
+    <div class="summary-row summary-shipping">
+      <span>Shipping</span>
+      <span class="free-tag">FREE</span>
+    </div>
+
+    <div class="summary-row summary-discount" *ngIf="couponApplied">
+      <span>Coupon Discount</span>
+      <span class="discount-val">- &#x09F3;{{ discountAmount | number:'1.2-2' }}</span>
+    </div>
+
+    <hr>
+
+    <div class="summary-row summary-total">
+      <span>Total</span>
+      <span>&#x09F3;{{ finalTotal | number:'1.2-2' }}</span>
+    </div>
+
+    <div class="savings-badge" *ngIf="couponApplied">
+      You are saving &#x09F3;{{ discountAmount | number:'1.2-2' }} on this order.
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,103 @@
+<div class="auth-page register-page">
+  <a class="back-home" routerLink="/">← Back to Home</a>
+
+  <section class="auth-shell">
+    <aside class="auth-visual">
+      <div class="brand-mini"><img src="assets/Rural_mart_logo_mark.png" alt="Rural Mart"><span>Rural<b>Mart</b></span></div>
+      <div class="visual-copy">
+        <small>Join Rural Mart</small>
+        <h1>Create Your<br>Account</h1>
+        <p>Start shopping fresh natural products from trusted farmers and local sellers.</p>
+      </div>
+      <div class="visual-card">
+        <div><b>Natural</b><span>Trusted Products</span></div>
+        <div><b>Secure</b><span>Safe Payment</span></div>
+        <div><b>Fast</b><span>Delivery Support</span></div>
+      </div>
+    </aside>
+
+    <main class="auth-card">
+      <div class="form-head">
+        <span class="form-kicker">New Customer</span>
+        <h2>Create an Account</h2>
+        <p>Fill in the details below to get started.</p>
+      </div>
+
+      <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+      <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Full Name <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="input-icon">👤</span>
+              <input type="text" formControlName="name" placeholder="Enter your full name" [class.input-error]="submitted && f['name'].errors">
+            </div>
+            <small class="err-text" *ngIf="submitted && f['name'].errors?.['required']">Name is required</small>
+            <small class="err-text" *ngIf="submitted && f['name'].errors?.['minlength']">Minimum 2 characters required</small>
+          </div>
+
+          <div class="form-group">
+            <label>Email Address <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="input-icon">@</span>
+              <input type="email" formControlName="email" placeholder="Enter your email" [class.input-error]="submitted && f['email'].errors">
+            </div>
+            <small class="err-text" *ngIf="submitted && f['email'].errors?.['required']">Email is required</small>
+            <small class="err-text" *ngIf="submitted && f['email'].errors?.['email']">Enter a valid email</small>
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number <span class="req">*</span></label>
+            <div class="phone-row">
+              <div class="country-code">BD +880</div>
+              <div class="input-wrap phone-input">
+                <input type="text" formControlName="phone" placeholder="01XXXXXXXXX" [class.input-error]="submitted && f['phone'].errors">
+              </div>
+            </div>
+            <small class="err-text" *ngIf="submitted && f['phone'].errors?.['required']">Phone is required</small>
+            <small class="err-text" *ngIf="submitted && f['phone'].errors?.['pattern']">Valid BD number required</small>
+          </div>
+
+          <div class="form-group full">
+            <label>Password <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="input-icon">⌕</span>
+              <input [type]="showPass ? 'text' : 'password'" formControlName="password" placeholder="Create a password" [class.input-error]="submitted && f['password'].errors">
+              <button type="button" class="eye-btn" (click)="showPass = !showPass">{{ showPass ? 'Hide' : 'Show' }}</button>
+            </div>
+            <small class="err-text" *ngIf="submitted && f['password'].errors?.['required']">Password is required</small>
+            <small class="err-text" *ngIf="submitted && f['password'].errors?.['minlength']">Minimum 6 characters required</small>
+          </div>
+
+          <div class="form-group full">
+            <label>Address</label>
+            <div class="input-wrap">
+              <span class="input-icon">⌂</span>
+              <input type="text" formControlName="address" placeholder="Your address (optional)">
+            </div>
+          </div>
+
+        </div>
+
+        <label class="terms"><input type="checkbox"> I agree to the <a>Terms & Conditions</a> and <a>Privacy Policy</a></label>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          {{ isLoading ? 'Creating account...' : 'Create Account  →' }}
+        </button>
+      </form>
+
+      <div class="divider"><span>or sign up with</span></div>
+      <div class="social-row">
+        <button type="button"><b>G</b> Google</button>
+        <button type="button"><b>f</b> Facebook</button>
+      </div>
+
+      <div class="auth-footer">
+        Already have an account?
+        <a routerLink="/login">Login</a>
+      </div>
+    </main>
+  </section>
+</div>

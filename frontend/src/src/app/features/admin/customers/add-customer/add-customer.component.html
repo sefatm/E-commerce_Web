@@ -1,0 +1,129 @@
+<div class="customer-form-page">
+
+  <div class="page-header">
+    <div>
+      <h2>👤 Add New Customer</h2>
+      <p>Fill in the details to register a new customer</p>
+    </div>
+    <!-- ✅ FIX #9: Back button ছিল না -->
+    <button class="btn btn-outline" routerLink="/admin/customers/list">⬅ Back to List</button>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert alert-error"   *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="form-card">
+    <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+
+      <!-- ===== Basic Info ===== -->
+      <div class="section-title">👤 Basic Information</div>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" formControlName="name" placeholder="e.g. Rahim Uddin" class="form-control">
+          <span class="err" *ngIf="submitted && f['name'].errors?.['required']">Name is required</span>
+        </div>
+
+        <div class="form-group">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" formControlName="email" placeholder="email@example.com" class="form-control">
+          <span class="err" *ngIf="submitted && f['email'].errors?.['required']">Email is required</span>
+          <span class="err" *ngIf="submitted && f['email'].errors?.['email']">Enter a valid email address</span>
+        </div>
+
+        <div class="form-group">
+          <label>Phone <span class="req">*</span></label>
+          <input type="text" formControlName="phone" placeholder="01XXXXXXXXX" class="form-control">
+          <span class="err" *ngIf="submitted && f['phone'].errors?.['required']">Phone is required</span>
+          <!-- ✅ FIX #10: Angular এ nested error property access করতে ?. দরকার -->
+          <span class="err" *ngIf="submitted && f['phone'].errors?.['pattern']">
+            Valid BD phone number required (01XXXXXXXXX)
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Customer Type</label>
+          <select formControlName="type" class="form-control">
+            <option value="regular">Regular</option>
+            <option value="vip">⭐ VIP</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- ===== Account ===== -->
+      <div class="section-title">🔐 Account</div>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Password <span class="req">*</span></label>
+          <input type="password" formControlName="password" placeholder="Min 6 characters" class="form-control">
+          <span class="err" *ngIf="submitted && f['password'].errors?.['required']">Password is required</span>
+          <span class="err" *ngIf="submitted && f['password'].errors?.['minlength']">
+            Minimum 6 characters required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <select formControlName="status" class="form-control">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- ===== Address ===== -->
+      <div class="section-title">📍 Address</div>
+      <div class="form-grid">
+
+        <div class="form-group full-width">
+          <label>Street Address <span class="req">*</span></label>
+          <textarea formControlName="address" rows="2"
+            placeholder="House no, road, area..." class="form-control"></textarea>
+          <span class="err" *ngIf="submitted && f['address'].errors?.['required']">Address is required</span>
+        </div>
+
+        <div class="form-group">
+          <label>District <span class="req">*</span></label>
+          <select formControlName="district" class="form-control">
+            <option value="">— Select District —</option>
+            <option *ngFor="let d of districts" [value]="d">{{ d }}</option>
+          </select>
+          <span class="err" *ngIf="submitted && f['district'].errors?.['required']">District is required</span>
+        </div>
+
+        <div class="form-group">
+          <label>Upazila <span class="req">*</span></label>
+          <!-- ✅ FIX #11: District select না করলে upazila disabled থাকবে -->
+          <select formControlName="upazila" class="form-control"
+            [attr.disabled]="upazilas.length === 0 ? true : null">
+            <option value="">— Select Upazila —</option>
+            <option *ngFor="let u of upazilas" [value]="u">{{ u }}</option>
+          </select>
+          <span class="err" *ngIf="submitted && f['upazila'].errors?.['required']">Upazila is required</span>
+          <small class="hint" *ngIf="upazilas.length === 0 && !f['district'].value">
+            Select a district first
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Postal Code</label>
+          <input type="text" formControlName="postalCode" placeholder="e.g. 1207" class="form-control">
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading">
+          {{ isLoading ? '⏳ Saving...' : '💾 Save Customer' }}
+        </button>
+        <button type="button" class="btn btn-outline" routerLink="/admin/customers/list">Cancel</button>
+      </div>
+
+    </form>
+  </div>
+
+</div>

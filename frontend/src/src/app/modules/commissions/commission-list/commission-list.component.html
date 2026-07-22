@@ -1,0 +1,83 @@
+<div class="commission-page">
+  <div class="page-header">
+    <div>
+      <h1>Commission & Seller Earnings</h1>
+      <p>Real payout records generated from seller orders.</p>
+    </div>
+    <button class="refresh-btn" (click)="load()">Refresh</button>
+  </div>
+
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <section class="stat-grid" *ngIf="summary">
+    <div class="stat-card">
+      <span>Gross Sales</span>
+      <strong>&#x09F3;{{ (summary.grossAmount || 0) | number:'1.2-2' }}</strong>
+    </div>
+    <div class="stat-card">
+      <span>Platform Commission</span>
+      <strong>&#x09F3;{{ (summary.platformCommission || 0) | number:'1.2-2' }}</strong>
+    </div>
+    <div class="stat-card">
+      <span>Seller Amount</span>
+      <strong>&#x09F3;{{ (summary.sellerAmount || 0) | number:'1.2-2' }}</strong>
+    </div>
+    <div class="stat-card">
+      <span>Payable</span>
+      <strong>&#x09F3;{{ (summary.payableAmount || 0) | number:'1.2-2' }}</strong>
+    </div>
+    <div class="stat-card">
+      <span>Paid</span>
+      <strong>&#x09F3;{{ (summary.paidAmount || 0) | number:'1.2-2' }}</strong>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <select [(ngModel)]="statusFilter" (change)="applyFilter()">
+      <option value="all">All Status</option>
+      <option value="PENDING">Pending</option>
+      <option value="PAYABLE">Payable</option>
+      <option value="PAID">Paid</option>
+    </select>
+  </div>
+
+  <div class="loading" *ngIf="isLoading">Loading commission records...</div>
+
+  <div class="table-card" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Seller</th>
+          <th>Gross</th>
+          <th>Rate</th>
+          <th>Commission</th>
+          <th>Seller Payout</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filtered">
+          <td>{{ c.order?.orderCode || c.order?.id }}</td>
+          <td>{{ c.seller?.shopName || c.seller?.name || 'N/A' }}</td>
+          <td>&#x09F3;{{ (c.grossAmount || 0) | number:'1.2-2' }}</td>
+          <td>{{ c.commissionRate || 0 }}%</td>
+          <td>&#x09F3;{{ (c.commissionAmount || 0) | number:'1.2-2' }}</td>
+          <td>&#x09F3;{{ (c.sellerAmount || 0) | number:'1.2-2' }}</td>
+          <td><span class="pill" [class.payable]="c.status === 'PAYABLE'" [class.paid]="c.status === 'PAID'">{{ c.status }}</span></td>
+          <td>
+            <div class="actions">
+              <button *ngIf="c.status === 'PENDING'" (click)="markPayable(c.id)">Payable</button>
+              <button *ngIf="c.status !== 'PAID'" class="paid-btn" (click)="markPaid(c.id)">Paid</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="8">No commission records found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,44 @@
+<div class="product-card">
+  <div class="card-img-wrap" (click)="viewProduct()" style="cursor:pointer">
+    <img
+      [src]="getImageUrl(product.image)"
+      [alt]="product.name"
+      (error)="img.src = PLACEHOLDER"
+      #img
+    >
+    <span class="sale-badge" *ngIf="product.isOnSale && product.salePrice">Sale</span>
+    <button
+      type="button"
+      class="wishlist-btn"
+      [class.saved]="isWishlisted()"
+      [title]="isWishlisted() ? 'Remove from wishlist' : 'Save to wishlist'"
+      (click)="toggleWishlist($event)">
+      {{ isWishlisted() ? 'Saved' : 'Save' }}
+    </button>
+  </div>
+
+  <div class="card-body">
+    <div class="card-meta">
+      <span class="category-pill">{{ product.category?.name || product.categoryName || 'Local Craft' }}</span>
+      <span class="stock-pill" *ngIf="product.stock !== undefined">{{ product.stock > 0 ? 'In stock' : 'Out' }}</span>
+    </div>
+
+    <h3 class="card-name" (click)="viewProduct()" style="cursor:pointer">{{ product.name }}</h3>
+
+    <div class="card-bottom">
+      <div class="price-wrap">
+        <ng-container *ngIf="product.isOnSale && product.salePrice && product.salePrice < product.price; else normalPrice">
+          <span class="price-sale">&#x09F3;{{ product.salePrice | number:'1.0-0' }}</span>
+          <span class="price-original">&#x09F3;{{ product.price | number:'1.0-0' }}</span>
+        </ng-container>
+        <ng-template #normalPrice>
+          <span class="price">&#x09F3;{{ product.price | number:'1.0-0' }}</span>
+        </ng-template>
+      </div>
+
+      <button class="add-to-cart-btn" (click)="addToCart()">
+        Add
+      </button>
+    </div>
+  </div>
+</div>

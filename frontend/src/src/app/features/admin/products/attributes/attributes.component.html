@@ -1,0 +1,106 @@
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Attributes</h1>
+      <p class="page-sub">Manage product attributes like Color, Size, Material, etc.</p>
+    </div>
+    <button class="btn-primary" (click)="showForm = !showForm">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      {{ showForm ? 'Cancel' : 'Add Attribute' }}
+    </button>
+  </div>
+
+  <!-- Add Attribute Form -->
+  <div class="form-card" *ngIf="showForm">
+    <div class="card-head">
+      <span class="card-title">New Attribute</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label required">Attribute Name</label>
+      <input
+        type="text"
+        class="form-input"
+        [(ngModel)]="attributeName"
+        placeholder="e.g. Color, Size, Material"
+      />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Values</label>
+      <div class="tag-input-wrap">
+        <div class="tags-area">
+          <span class="tag" *ngFor="let val of attributeValuesArray; let i = index">
+            {{ val }}
+            <button type="button" class="tag-remove" (click)="removeValue(i)">×</button>
+          </span>
+          <input
+            type="text"
+            class="tag-input"
+            [(ngModel)]="newValue"
+            placeholder="{{ attributeValuesArray.length === 0 ? 'Type a value and press Enter...' : 'Add more...' }}"
+            (keyup.enter)="addValue()"
+            (keyup.comma)="addValue()"
+          />
+        </div>
+        <button type="button" class="add-value-btn" (click)="addValue()">Add</button>
+      </div>
+      <p class="input-hint">Enter a value and press Enter or comma (,) to add it</p>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-primary" (click)="onSubmit()" [disabled]="!attributeName || attributeValuesArray.length === 0">
+        Save Attribute
+      </button>
+      <button class="btn-outline" (click)="cancelForm()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div><p>Loading...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && attributes.length === 0">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <rect x="6" y="14" width="36" height="20" rx="4" stroke="#cbd5e1" stroke-width="2"/>
+      <circle cx="16" cy="24" r="4" stroke="#cbd5e1" stroke-width="2"/>
+      <line x1="24" y1="24" x2="36" y2="24" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <p class="empty-text">No attributes yet. Add your first attribute.</p>
+  </div>
+
+  <!-- Attribute Cards -->
+  <div class="attr-grid" *ngIf="!isLoading && attributes.length > 0">
+    <div class="attr-card" *ngFor="let attr of attributes">
+      <div class="attr-header">
+        <div class="attr-name-wrap">
+          <div class="attr-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+              <path d="M4.5 7h5M7 4.5v5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="attr-name">{{ attr.name }}</div>
+            <div class="attr-count">{{ (attr.values || []).length }} values</div>
+          </div>
+        </div>
+        <button class="icon-btn danger" title="Delete" (click)="deleteAttribute(attr._id || attr.id)">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M2 3.5h9M5 3.5V2h3v1.5M4.5 3.5v6a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="attr-values">
+        <span class="value-tag" *ngFor="let val of (attr.values || [])">{{ val }}</span>
+        <span class="empty-values" *ngIf="!attr.values || attr.values.length === 0">No values</span>
+      </div>
+    </div>
+  </div>
+
+</div>

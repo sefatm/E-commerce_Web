@@ -1,0 +1,413 @@
+<div class="settings-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">⚙️ Settings</h1>
+      <p class="page-sub">Manage your store configuration</p>
+    </div>
+  </div>
+
+  <!-- Alert Messages -->
+  <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert alert-error"   *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" *ngIf="isLoading">
+    <div class="spinner"></div> Loading settings...
+  </div>
+
+  <div class="settings-layout" *ngIf="!isLoading">
+
+    <!-- Tab Sidebar -->
+    <aside class="settings-sidebar">
+      <button class="tab-btn" [class.active]="activeTab==='site'"         (click)="setTab('site')">
+        <span class="tab-icon">🌐</span> Site Settings
+      </button>
+      <button class="tab-btn" [class.active]="activeTab==='profile'"      (click)="setTab('profile')">
+        <span class="tab-icon">👤</span> Admin Profile
+      </button>
+      <button class="tab-btn" [class.active]="activeTab==='payment'"      (click)="setTab('payment')">
+        <span class="tab-icon">💳</span> Payment
+      </button>
+      <button class="tab-btn" [class.active]="activeTab==='shipping'"     (click)="setTab('shipping')">
+        <span class="tab-icon">🚚</span> Shipping
+      </button>
+      <button class="tab-btn" [class.active]="activeTab==='notification'" (click)="setTab('notification')">
+        <span class="tab-icon">🔔</span> Notifications
+      </button>
+    </aside>
+
+    <!-- Tab Content -->
+    <div class="settings-content">
+
+      <!-- ══ SITE SETTINGS ══ -->
+      <div class="tab-panel" *ngIf="activeTab==='site'">
+        <h2 class="panel-title">Site Settings</h2>
+        <p class="panel-sub">Basic store information and configuration.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Site Name</label>
+            <input type="text" [(ngModel)]="site.siteName" placeholder="Rural Mart">
+          </div>
+          <div class="form-group">
+            <label>Currency</label>
+            <select [(ngModel)]="site.currency">
+              <option value="BDT">BDT — Bangladeshi Taka (৳)</option>
+              <option value="USD">USD — US Dollar ($)</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Tagline</label>
+            <input type="text" [(ngModel)]="site.siteTagline" placeholder="Your online store tagline">
+          </div>
+          <div class="form-group">
+            <label>Contact Email</label>
+            <input type="email" [(ngModel)]="site.contactEmail" placeholder="support@store.com">
+          </div>
+          <div class="form-group">
+            <label>Contact Phone</label>
+            <input type="text" [(ngModel)]="site.contactPhone" placeholder="+880 1700-000000">
+          </div>
+          <div class="form-group full">
+            <label>Address</label>
+            <input type="text" [(ngModel)]="site.address" placeholder="Dhaka, Bangladesh">
+          </div>
+          <div class="form-group">
+            <label>Timezone</label>
+            <select [(ngModel)]="site.timezone">
+              <option value="Asia/Dhaka">Asia/Dhaka (GMT+6)</option>
+              <option value="UTC">UTC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Maintenance Mode</label>
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" [(ngModel)]="site.maintenanceMode">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label" [class.on]="site.maintenanceMode">
+                {{ site.maintenanceMode ? 'ON — Site is offline for visitors' : 'OFF' }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" (click)="saveSite()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : '💾 Save Site Settings' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ ADMIN PROFILE ══ -->
+      <div class="tab-panel" *ngIf="activeTab==='profile'">
+        <h2 class="panel-title">Admin Profile</h2>
+        <p class="panel-sub">Update your admin account information.</p>
+
+        <div class="profile-photo-card">
+          <div class="admin-photo-preview">
+            <img *ngIf="profilePhotoPreview" [src]="profilePhotoPreview" alt="Admin profile photo">
+            <span *ngIf="!profilePhotoPreview">{{ adminInitials() }}</span>
+          </div>
+          <div class="admin-photo-info">
+            <label>Profile Photo</label>
+            <p>Upload a clear square image for the admin dashboard header.</p>
+            <input #adminPhotoInput type="file" accept="image/*" hidden (change)="onProfilePhotoSelect($event)">
+            <button type="button" class="btn-upload-photo" (click)="adminPhotoInput.click()">
+              Choose Photo
+            </button>
+            <span class="selected-file" *ngIf="selectedProfilePhoto">{{ selectedProfilePhoto.name }}</span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" [(ngModel)]="profile.name" placeholder="Admin Name">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="profile.email" placeholder="admin@store.com">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="text" [(ngModel)]="profile.phone" placeholder="+880 1700-000000">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" (click)="saveProfile()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : '💾 Save Profile' }}
+          </button>
+        </div>
+
+        <!-- Change Password -->
+        <div class="divider"></div>
+        <h3 class="sub-title">Change Password</h3>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Current Password</label>
+            <div class="pass-wrap">
+              <input [type]="showCurrentPass ? 'text' : 'password'" [(ngModel)]="passwordForm.currentPassword" placeholder="Current password">
+              <button class="eye-btn" (click)="showCurrentPass = !showCurrentPass">{{ showCurrentPass ? '🙈' : '👁️' }}</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <div class="pass-wrap">
+              <input [type]="showNewPass ? 'text' : 'password'" [(ngModel)]="passwordForm.newPassword" placeholder="Min 6 characters">
+              <button class="eye-btn" (click)="showNewPass = !showNewPass">{{ showNewPass ? '🙈' : '👁️' }}</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Confirm New Password</label>
+            <input type="password" [(ngModel)]="passwordForm.confirmPassword" placeholder="Repeat new password">
+            <span class="field-hint error"
+              *ngIf="passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword">
+              Passwords do not match
+            </span>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" (click)="changePassword()" [disabled]="isSaving">
+            {{ isSaving ? 'Changing...' : '🔐 Change Password' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ PAYMENT SETTINGS ══ -->
+      <div class="tab-panel" *ngIf="activeTab==='payment'">
+        <h2 class="panel-title">Payment Settings</h2>
+        <p class="panel-sub">Configure accepted payment methods for your store.</p>
+
+        <!-- COD -->
+        <div class="payment-card">
+          <div class="payment-header">
+            <div class="payment-info">
+              <span class="payment-icon">💵</span>
+              <div>
+                <div class="payment-name">Cash on Delivery (COD)</div>
+                <div class="payment-desc">Customer pays when order is delivered</div>
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="payment.codEnabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- bKash -->
+        <div class="payment-card">
+          <div class="payment-header">
+            <div class="payment-info">
+              <span class="payment-icon">📱</span>
+              <div>
+                <div class="payment-name">bKash</div>
+                <div class="payment-desc">Mobile banking payment</div>
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="payment.bkashEnabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="payment-body" *ngIf="payment.bkashEnabled">
+            <div class="form-group">
+              <label>bKash Merchant Number</label>
+              <input type="text" [(ngModel)]="payment.bkashNumber" placeholder="01XXXXXXXXX">
+            </div>
+          </div>
+        </div>
+
+        <!-- Nagad -->
+        <div class="payment-card">
+          <div class="payment-header">
+            <div class="payment-info">
+              <span class="payment-icon">💸</span>
+              <div>
+                <div class="payment-name">Nagad</div>
+                <div class="payment-desc">Mobile banking payment</div>
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="payment.nagadEnabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="payment-body" *ngIf="payment.nagadEnabled">
+            <div class="form-group">
+              <label>Nagad Merchant Number</label>
+              <input type="text" [(ngModel)]="payment.nagadNumber" placeholder="01XXXXXXXXX">
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank Transfer -->
+        <div class="payment-card">
+          <div class="payment-header">
+            <div class="payment-info">
+              <span class="payment-icon">🏦</span>
+              <div>
+                <div class="payment-name">Bank Transfer</div>
+                <div class="payment-desc">Direct bank account transfer</div>
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="payment.bankEnabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="payment-body" *ngIf="payment.bankEnabled">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Bank Name</label>
+                <input type="text" [(ngModel)]="payment.bankName" placeholder="e.g. Dutch-Bangla Bank">
+              </div>
+              <div class="form-group">
+                <label>Account Number</label>
+                <input type="text" [(ngModel)]="payment.bankAccount" placeholder="Account number">
+              </div>
+              <div class="form-group">
+                <label>Branch</label>
+                <input type="text" [(ngModel)]="payment.bankBranch" placeholder="Branch name">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-save" (click)="savePayment()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : '💾 Save Payment Settings' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ SHIPPING SETTINGS ══ -->
+      <div class="tab-panel" *ngIf="activeTab==='shipping'">
+        <h2 class="panel-title">Shipping Settings</h2>
+        <p class="panel-sub">Configure delivery fees and free shipping rules.</p>
+
+        <div class="payment-card">
+          <div class="payment-header">
+            <div class="payment-info">
+              <span class="payment-icon">🎁</span>
+              <div>
+                <div class="payment-name">Free Shipping</div>
+                <div class="payment-desc">Offer free shipping above a minimum order</div>
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="shipping.freeShippingEnabled">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="payment-body" *ngIf="shipping.freeShippingEnabled">
+            <div class="form-group">
+              <label>Minimum Order Amount (৳)</label>
+              <input type="number" [(ngModel)]="shipping.freeShippingThreshold" min="0" placeholder="1000">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid" style="margin-top:20px">
+          <div class="form-group">
+            <label>Standard Shipping Fee (৳)</label>
+            <input type="number" [(ngModel)]="shipping.defaultShippingFee" min="0" placeholder="60">
+          </div>
+          <div class="form-group">
+            <label>Express Shipping Fee (৳)</label>
+            <input type="number" [(ngModel)]="shipping.expressFee" min="0" placeholder="120">
+          </div>
+          <div class="form-group">
+            <label>Dhaka City Delivery Fee (৳)</label>
+            <input type="number" [(ngModel)]="shipping.dhakaFee" min="0" placeholder="50">
+          </div>
+          <div class="form-group">
+            <label>Outside Dhaka Delivery Fee (৳)</label>
+            <input type="number" [(ngModel)]="shipping.outsideDhakaFee" min="0" placeholder="100">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-save" (click)="saveShipping()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : '💾 Save Shipping Settings' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ NOTIFICATION SETTINGS ══ -->
+      <div class="tab-panel" *ngIf="activeTab==='notification'">
+        <h2 class="panel-title">Notification Settings</h2>
+        <p class="panel-sub">Configure when and how you receive alerts.</p>
+
+        <div class="notif-section">
+          <h3 class="sub-title">📧 Email Notifications</h3>
+          <div class="notif-row">
+            <div class="notif-info">
+              <div class="notif-name">New Order Placed</div>
+              <div class="notif-desc">Notify when a customer places a new order</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="notification.emailOnNewOrder">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <div class="notif-name">Order Status Changed</div>
+              <div class="notif-desc">Notify when an order status is updated</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="notification.emailOnOrderStatus">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="notif-row">
+            <div class="notif-info">
+              <div class="notif-name">Low Stock Alert</div>
+              <div class="notif-desc">Notify when product stock falls below threshold</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="notification.emailOnLowStock">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group" style="margin-top:12px; max-width:220px" *ngIf="notification.emailOnLowStock">
+            <label>Low Stock Threshold</label>
+            <input type="number" [(ngModel)]="notification.lowStockThreshold" min="1" placeholder="5">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="notif-section">
+          <h3 class="sub-title">📱 SMS Notifications</h3>
+          <div class="notif-row">
+            <div class="notif-info">
+              <div class="notif-name">New Order SMS</div>
+              <div class="notif-desc">Receive SMS when a new order arrives</div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" [(ngModel)]="notification.smsOnNewOrder">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-group" style="margin-top:12px; max-width:260px" *ngIf="notification.smsOnNewOrder">
+            <label>SMS Phone Number</label>
+            <input type="text" [(ngModel)]="notification.smsNumber" placeholder="01XXXXXXXXX">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-save" (click)="saveNotification()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : '💾 Save Notification Settings' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

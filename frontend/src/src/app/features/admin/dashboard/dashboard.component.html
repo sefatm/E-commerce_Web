@@ -1,0 +1,240 @@
+<div class="rm-dashboard">
+
+  <section class="rm-hero">
+    <div class="hero-copy">
+      <span class="hero-kicker">Rural Mart Admin Center</span>
+      <h1>{{ greeting }}, {{ adminName }} 👋</h1>
+      <p>{{ currentMonth }} marketplace performance, order flow, customer growth and seller activity in one clean dashboard.</p>
+
+      <div class="hero-actions">
+        <button class="primary-action" (click)="loadDashboard()" [disabled]="isLoading">
+          <span>{{ isLoading ? '⏳' : '↻' }}</span>
+          {{ isLoading ? 'Loading...' : 'Refresh Data' }}
+        </button>
+        <a routerLink="/admin/orders/list" class="ghost-action">Manage Orders</a>
+        <a routerLink="/admin/sellers/approvals" class="ghost-action">Seller Requests</a>
+      </div>
+    </div>
+
+    <div class="hero-panel">
+      <div class="panel-badge">Live Overview</div>
+      <div class="panel-value">{{ formatRevenue(revenueThisMonth) }}</div>
+      <div class="panel-label">Revenue this month</div>
+      <div class="mini-meter">
+        <span style="width: 76%"></span>
+      </div>
+      <div class="panel-foot">
+        <span>{{ totalOrders | number }} Orders</span>
+        <span>{{ totalCustomers | number }} Customers</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="alert-card" *ngIf="errorMsg">
+    <span>⚠️</span>
+    <p>{{ errorMsg }}</p>
+    <button (click)="loadDashboard()">Try again</button>
+  </div>
+
+  <div class="skeleton-grid" *ngIf="isLoading">
+    <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <section class="metric-grid">
+      <article class="metric-card sales-card">
+        <div class="metric-icon">৳</div>
+        <div class="metric-content">
+          <span>Total Sales</span>
+          <strong>{{ formatRevenue(totalRevenue) }}</strong>
+          <small [ngClass]="revenueGrowth >= 0 ? 'positive' : 'negative'">
+            {{ revenueGrowth >= 0 ? '↑' : '↓' }} {{ revenueGrowth | number:'1.1-1' }}% growth
+          </small>
+        </div>
+      </article>
+
+      <article class="metric-card orders-card">
+        <div class="metric-icon">🧾</div>
+        <div class="metric-content">
+          <span>Total Orders</span>
+          <strong>{{ totalOrders | number }}</strong>
+          <small>{{ pendingOrders }} pending • {{ acceptedOrders }} accepted</small>
+        </div>
+      </article>
+
+      <article class="metric-card customers-card">
+        <div class="metric-icon">👥</div>
+        <div class="metric-content">
+          <span>Customers</span>
+          <strong>{{ totalCustomers | number }}</strong>
+          <small>Unique buyers from orders</small>
+        </div>
+      </article>
+
+      <article class="metric-card products-card">
+        <div class="metric-icon">🌿</div>
+        <div class="metric-content">
+          <span>Active Products</span>
+          <strong>{{ activeProducts | number }}</strong>
+          <small>Platform revenue {{ formatRevenue(systemRevenue) }}</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="center-grid">
+      <article class="center-card customer-center">
+        <div>
+          <span class="center-kicker">Customer Center</span>
+          <h3>Manage buyers, orders and support</h3>
+          <p>Review customer list, track order history and handle marketplace service faster.</p>
+        </div>
+        <div class="center-actions">
+          <a routerLink="/admin/customers/list">Customer List</a>
+          <a routerLink="/admin/customers/add">Create Customer</a>
+        </div>
+      </article>
+
+      <article class="center-card seller-center">
+        <div>
+          <span class="center-kicker">Vendor / Seller Center</span>
+          <h3>Approve vendors, products and payouts</h3>
+          <p>Control seller requests, product approvals, withdrawals and commissions from one place.</p>
+        </div>
+        <div class="center-actions">
+          <a routerLink="/admin/sellers/approvals">Seller Requests</a>
+          <a routerLink="/admin/products/approvals">Product Approvals</a>
+          <a routerLink="/admin/sellers/withdrawals">Payouts</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-layout">
+      <main class="dashboard-main">
+
+        <article class="chart-card revenue-card">
+          <div class="section-head">
+            <div>
+              <h2>Revenue Overview</h2>
+              <p>Monthly breakdown — last {{ monthlyRevenue.length }} months</p>
+            </div>
+            <a routerLink="/admin/reports/revenue">Report</a>
+          </div>
+
+          <div class="empty-state" *ngIf="monthlyRevenue.length === 0">No revenue data yet.</div>
+
+          <div class="revenue-chart" *ngIf="monthlyRevenue.length > 0">
+            <div class="axis">
+              <span>{{ formatRevenue(maxRevenue) }}</span>
+              <span>{{ formatRevenue(maxRevenue * 0.5) }}</span>
+              <span>৳0</span>
+            </div>
+
+            <div class="bar-area">
+              <div class="bar-column" *ngFor="let m of monthlyRevenue; let last = last">
+                <div class="bar-tooltip">{{ formatRevenue(m.totalRevenue) }}</div>
+                <div class="bar-track">
+                  <span class="bar-fill" [class.active]="last" [style.height.%]="m.pct || 2"></span>
+                </div>
+                <small>{{ m.month }}</small>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="table-card">
+          <div class="section-head">
+            <div>
+              <h2>Recent Orders</h2>
+              <p>Latest {{ orders.length }} transactions</p>
+            </div>
+            <a routerLink="/admin/orders/list">View All</a>
+          </div>
+
+          <div class="empty-state" *ngIf="orders.length === 0">No orders yet.</div>
+
+          <div class="order-list" *ngIf="orders.length > 0">
+            <div class="order-row" *ngFor="let order of orders">
+              <div class="order-customer">
+                <div class="avatar" [style.background]="order.avatarBg">{{ order.initials }}</div>
+                <div>
+                  <strong>{{ order.customer }}</strong>
+                  <span>{{ order.id }} • {{ order.date }}</span>
+                </div>
+              </div>
+
+              <div class="order-meta">
+                <span>{{ order.items }} items</span>
+                <strong>{{ order.total }}</strong>
+                <em class="status-pill" [ngClass]="order.statusClass">{{ order.status }}</em>
+                <button (click)="viewOrder(order)">View</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      </main>
+
+      <aside class="dashboard-side">
+        <article class="side-card status-card">
+          <div class="section-head compact">
+            <div>
+              <h2>Order Status</h2>
+              <p>All time breakdown</p>
+            </div>
+          </div>
+
+          <div class="donut-wrap">
+            <svg viewBox="0 0 120 120" width="140" height="140">
+              <circle cx="60" cy="60" r="44" fill="none" stroke="#edf7f1" stroke-width="18"></circle>
+              <circle *ngFor="let status of orderStatuses; let i = index" cx="60" cy="60" r="44" fill="none"
+                [attr.stroke]="status.color" stroke-width="18" stroke-linecap="round"
+                [attr.stroke-dasharray]="getStatusDashArray(status)"
+                [attr.stroke-dashoffset]="getStatusDashOffset(i)"
+                transform="rotate(-90 60 60)"></circle>
+              <text x="60" y="57" text-anchor="middle" font-size="16" font-weight="800" fill="#173b2f">{{ totalOrders | number }}</text>
+              <text x="60" y="73" text-anchor="middle" font-size="10" fill="#789286">Orders</text>
+            </svg>
+          </div>
+
+          <div class="status-list">
+            <div class="status-line" *ngFor="let s of orderStatuses">
+              <span class="status-dot" [style.background]="s.color"></span>
+              <b>{{ s.label }}</b>
+              <small>{{ s.count }} • {{ s.pct }}%</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="side-card product-card">
+          <div class="section-head compact">
+            <div>
+              <h2>Top Products</h2>
+              <p>Best selling items</p>
+            </div>
+            <a routerLink="/admin/reports/products">Report</a>
+          </div>
+
+          <div class="empty-state small" *ngIf="topProducts.length === 0">No sales data yet.</div>
+
+          <div class="top-products" *ngIf="topProducts.length > 0">
+            <div class="top-product" *ngFor="let p of topProducts; let i = index">
+              <span class="rank">{{ i + 1 }}</span>
+              <div>
+                <strong>{{ p.name }}</strong>
+                <small>{{ p.sold }} sold • {{ formatRevenue(p.revenue) }}</small>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="mission-card">
+          <span>Farm to Customer</span>
+          <h3>Build trust with rural sellers</h3>
+          <p>Keep product quality, fast delivery and transparent seller approval under control.</p>
+          <a routerLink="/admin/commissions">Commission Settings</a>
+        </article>
+      </aside>
+    </section>
+
+  </ng-container>
+</div>

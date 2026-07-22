@@ -1,0 +1,160 @@
+<div class="report-page">
+
+  <div class="page-header no-print">
+    <div>
+      <h2>Sales Report</h2>
+      <p>Order-wise sales breakdown with date and status filters.</p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="exportCsv()" [disabled]="!report || filteredItems.length === 0">
+        Export CSV
+      </button>
+      <button class="btn btn-outline" (click)="printReport()" [disabled]="!report">
+        Print Report
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-bar no-print">
+
+    <div class="date-filters">
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" [(ngModel)]="dateFrom" class="form-control">
+      </div>
+
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" [(ngModel)]="dateTo" class="form-control">
+      </div>
+
+      <button class="btn btn-primary" (click)="loadReport()">
+        Generate
+      </button>
+    </div>
+
+    <div class="tab-group">
+      <button
+        *ngFor="let s of statuses"
+        [class.active]="selectedStatus === s"
+        (click)="onStatusChange(s)">
+        {{ s }}
+      </button>
+    </div>
+
+  </div>
+
+  <div class="alert-error" *ngIf="errorMsg">
+    {{ errorMsg }}
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    Generating report...
+  </div>
+
+  <ng-container *ngIf="report && !isLoading">
+
+    <div class="kpi-row">
+
+      <div class="kpi-card">
+        <div class="kpi-val">{{ report.totalOrders }}</div>
+        <div class="kpi-label">Total Orders</div>
+      </div>
+
+      <div class="kpi-card kpi-green">
+        <div class="kpi-val">
+          &#x09F3;{{ report.totalRevenue | number:'1.0-0' }}
+        </div>
+        <div class="kpi-label">Total Revenue</div>
+      </div>
+
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-val">
+          &#x09F3;{{ report.averageOrderValue | number:'1.0-0' }}
+        </div>
+        <div class="kpi-label">Average Order Value</div>
+      </div>
+
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-val">
+          {{ report.dateFrom | date:'dd MMM' }} to {{ report.dateTo | date:'dd MMM yyyy' }}
+        </div>
+        <div class="kpi-label">Date Range</div>
+      </div>
+
+    </div>
+
+    <div class="table-card">
+
+      <h3 class="print-title">
+        Sales Report: {{ report.dateFrom | date:'dd MMM yyyy' }}
+        to {{ report.dateTo | date:'dd MMM yyyy' }}
+      </h3>
+
+      <div class="table-responsive">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Order Code</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Payment</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let item of filteredItems; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>
+                <span class="order-code">{{ item.orderCode }}</span>
+              </td>
+              <td>{{ item.customerName }}</td>
+              <td>{{ item.orderDate | date:'dd MMM yyyy' }}</td>
+              <td>{{ item.paymentMethod }}</td>
+              <td>
+                <strong>&#x09F3;{{ item.totalAmount | number:'1.2-2' }}</strong>
+              </td>
+              <td>
+                <span
+                  class="status-badge"
+                  [ngClass]="getStatusClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="filteredItems.length === 0">
+              <td colspan="7" class="empty">
+                No sales data found for the selected filter.
+              </td>
+            </tr>
+
+          </tbody>
+
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="5">
+                <strong>Total ({{ filteredItems.length }} orders)</strong>
+              </td>
+
+              <td colspan="2">
+                <strong>&#x09F3;{{ totalRevenue | number:'1.2-2' }}</strong>
+              </td>
+            </tr>
+          </tfoot>
+
+        </table>
+
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

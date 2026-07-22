@@ -1,0 +1,113 @@
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Categories</h1>
+      <p class="page-sub">{{ categories.length }} categories</p>
+    </div>
+    <button class="btn-primary" (click)="toggleForm()">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      {{ showForm ? 'Cancel' : 'Add Category' }}
+    </button>
+  </div>
+
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <!-- Add/Edit Form -->
+  <div class="form-card" *ngIf="showForm">
+    <div class="card-head">
+      <span class="card-title">{{ editingId ? 'Edit' : 'New' }} Category</span>
+    </div>
+    <form (ngSubmit)="onSubmit()" #catForm="ngForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label required">Category Name</label>
+          <input type="text" class="form-input" [(ngModel)]="categoryForm.name" name="name" required placeholder="e.g. Electronics"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-input" [(ngModel)]="categoryForm.description" name="description" placeholder="Short description"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Parent Category</label>
+          <select class="form-select" [(ngModel)]="categoryForm.parent" name="parent">
+            <option value="">None (Top-level)</option>
+            <option *ngFor="let c of categories" [value]="c._id || c.id">{{ c.name }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="catForm.invalid">
+          {{ editingId ? 'Update' : 'Save' }} Category
+        </button>
+        <button type="button" class="btn-outline" (click)="cancelForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div><p>Loading...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && categories.length === 0">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <path d="M8 12h32M8 24h32M8 36h16" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <p class="empty-text">No categories yet.</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card" *ngIf="!isLoading && categories.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Parent</th>
+          <th>Products</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let cat of categories; let i = index">
+          <td class="idx-cell">{{ i + 1 }}</td>
+          <td>
+            <div class="cat-name-cell">
+              <div class="cat-dot" [style.background]="getCatColor(i)"></div>
+              <span class="cat-name">{{ cat.name }}</span>
+            </div>
+          </td>
+          <td class="muted-cell">{{ cat.description || '—' }}</td>
+          <td>
+            <span *ngIf="cat.parent" class="parent-tag">{{ cat.parent }}</span>
+            <span *ngIf="!cat.parent" class="muted-cell">—</span>
+          </td>
+          <td>
+            <span class="count-badge">{{ cat.productCount || 0 }}</span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="icon-btn edit" title="Edit" (click)="startEdit(cat)">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M9 2l2 2-7 7H2v-2L9 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="icon-btn danger" title="Delete" (click)="deleteCategory(cat._id || cat.id)">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M2 3.5h9M5 3.5V2h3v1.5M4.5 3.5v6a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

@@ -1,0 +1,243 @@
+<div class="orders-page">
+
+  <div class="page-header">
+    <h1 class="page-title">My Orders</h1>
+    <p class="page-sub">Track your order status and request a return after delivery.</p>
+  </div>
+
+  <div class="search-card" *ngIf="!order">
+    <h2 class="search-title">Track Order</h2>
+    <p class="search-sub">Use the order code you received after checkout.</p>
+
+    <div class="search-form">
+      <div class="form-group">
+        <label>Order Code</label>
+        <input
+          type="text"
+          [(ngModel)]="searchCode"
+          placeholder="Example: RURAL-MART-20260603-1234"
+          class="form-input"
+          (keyup.enter)="trackOrder()">
+      </div>
+
+      <button class="btn-track" (click)="trackOrder()" [disabled]="isSearching">
+        <span *ngIf="!isSearching">Track Order</span>
+        <span *ngIf="isSearching">Searching...</span>
+      </button>
+    </div>
+
+    <div class="search-error" *ngIf="searchError">
+      {{ searchError }}
+    </div>
+  </div>
+
+  <ng-container *ngIf="order">
+
+    <button class="btn-back" (click)="resetSearch()">
+      Search Again
+    </button>
+
+    <div class="alert-success" *ngIf="returnSuccess">{{ returnSuccess }}</div>
+
+    <div class="order-card">
+      <div class="order-card-header">
+        <div class="order-meta">
+          <div class="order-code">{{ order.orderCode }}</div>
+          <div class="order-date">{{ formatDate(order.orderDate) }}</div>
+        </div>
+        <div class="status-chip" [style.background]="getStatusColor(order.status) + '20'" [style.color]="getStatusColor(order.status)">
+          {{ order.status }}
+        </div>
+      </div>
+
+      <div class="timeline-wrap" *ngIf="order.status !== 'CANCELLED'">
+        <div class="timeline">
+          <ng-container *ngFor="let step of STEPS; let i = index; let last = last">
+            <div class="tl-step" [ngClass]="stepStatus(step)">
+              <div class="tl-circle">
+                <span *ngIf="stepStatus(step) === 'done'">OK</span>
+                <span *ngIf="stepStatus(step) !== 'done'">{{ i + 1 }}</span>
+              </div>
+              <div class="tl-label">{{ STEP_LABELS[step] }}</div>
+              <div class="tl-icon">{{ STEP_ICONS[step] }}</div>
+            </div>
+            <div class="tl-line" [class.done]="stepStatus(step) === 'done'" *ngIf="!last"></div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="cancelled-banner" *ngIf="order.status === 'CANCELLED'">
+        This order has been cancelled.
+        <span *ngIf="order.cancelReason"> Reason: {{ order.cancelReason }}</span>
+      </div>
+
+      <div class="order-info-grid">
+        <div class="info-block">
+          <div class="info-label">Customer</div>
+          <div class="info-value">{{ order.customerName }}</div>
+        </div>
+        <div class="info-block">
+          <div class="info-label">Phone</div>
+          <div class="info-value">{{ order.customerPhone }}</div>
+        </div>
+        <div class="info-block">
+          <div class="info-label">Shipping Address</div>
+          <div class="info-value">{{ order.shippingAddress }}</div>
+        </div>
+        <div class="info-block">
+          <div class="info-label">Payment Method</div>
+          <div class="info-value">{{ order.paymentMethod }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="items-card">
+      <div class="items-title">Order Items</div>
+
+      <div class="item-row" *ngFor="let item of order.items">
+        <img
+          [src]="item.productImage ? 'http://localhost:8080/uploads/' + item.productImage : 'https://placehold.co/60x60?text=?'"
+          [alt]="item.productName"
+          class="item-img"
+          (error)="img.src='https://placehold.co/60x60?text=?'" #img>
+        <div class="item-info">
+          <div class="item-name">{{ item.productName }}</div>
+          <div class="item-qty">Quantity: {{ item.quantity }}</div>
+        </div>
+        <div class="item-price-wrap">
+          <div class="item-price">&#x09F3;{{ (item.unitPrice * item.quantity) | number:'1.0-0' }}</div>
+          <div class="item-unit">(&#x09F3;{{ item.unitPrice | number:'1.0-0' }} x {{ item.quantity }})</div>
+        </div>
+        <span
+          class="return-status"
+          *ngIf="hasReturnRequest(item.productName)"
+          [class.approved]="returnStatus(item.productName) === 'APPROVED'"
+          [class.rejected]="returnStatus(item.productName) === 'REJECTED'">
+          Return {{ returnStatus(item.productName) }}
+        </span>
+
+        <button
+          class="btn-return"
+          [disabled]="!canReturn() || hasReturnRequest(item.productName)"
+          [title]="!canReturn() ? 'Return is available after delivery' : (hasReturnRequest(item.productName) ? 'Return request already submitted' : 'Request product return')"
+          (click)="openReturnForm(item.productName)">
+          {{ hasReturnRequest(item.productName) ? 'Requested' : 'Return' }}
+        </button>
+      </div>
+
+      <div class="item-row return-fallback" *ngIf="!order.items || order.items.length === 0">
+        <div class="item-info">
+          <div class="item-name">Full order return</div>
+          <div class="item-qty">Product details are not available for this order.</div>
+        </div>
+        <span
+          class="return-status"
+          *ngIf="hasReturnRequest('Full order')"
+          [class.approved]="returnStatus('Full order') === 'APPROVED'"
+          [class.rejected]="returnStatus('Full order') === 'REJECTED'">
+          Return {{ returnStatus('Full order') }}
+        </span>
+        <button
+          class="btn-return"
+          [disabled]="!canReturn() || hasReturnRequest('Full order')"
+          [title]="!canReturn() ? 'Return is available after delivery' : (hasReturnRequest('Full order') ? 'Return request already submitted' : 'Request full order return')"
+          (click)="openReturnForm('Full order')">
+          {{ hasReturnRequest('Full order') ? 'Requested' : 'Return' }}
+        </button>
+      </div>
+
+      <div class="order-total-row">
+        <div class="total-label">Total</div>
+        <div class="total-amount">&#x09F3;{{ order.totalAmount | number:'1.0-0' }}</div>
+      </div>
+
+      <div class="return-hint" *ngIf="!canReturn() && order.status !== 'CANCELLED'">
+        Return request will be available after the order is delivered.
+      </div>
+
+      <div class="return-history" *ngIf="orderReturns.length > 0">
+        <div class="return-history-title">Return Requests</div>
+        <div class="return-history-row" *ngFor="let ret of orderReturns">
+          <div>
+            <strong>{{ ret.productName }}</strong>
+            <p>{{ ret.reason }}</p>
+            <small *ngIf="ret.adminNote">{{ ret.adminNote }}</small>
+          </div>
+          <span
+            class="return-status"
+            [class.approved]="ret.status === 'APPROVED'"
+            [class.rejected]="ret.status === 'REJECTED'">
+            {{ ret.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="return-form-card" *ngIf="showReturnForm">
+      <h3 class="return-title">Return Request</h3>
+      <p class="return-sub">
+        Product: <strong>{{ selectedProduct }}</strong>
+      </p>
+
+      <div class="form-group">
+        <label>Return reason <span class="req">*</span></label>
+        <textarea
+          [(ngModel)]="returnReason"
+          rows="4"
+          maxlength="500"
+          placeholder="Write the return reason clearly. Example: damaged product, wrong item, size issue..."
+          class="form-input"></textarea>
+        <div class="char-count">{{ returnReason.length }} / 500</div>
+      </div>
+
+
+      <div class="refund-details-section">
+        <h4>Refund Details</h4>
+        <div class="refund-grid">
+          <div class="form-group">
+            <label>Refund method <span class="req">*</span></label>
+            <select [(ngModel)]="refundMethod" class="form-input">
+              <option value="">Select method</option>
+              <option value="ORIGINAL_PAYMENT" *ngIf="(order?.paymentMethod || '').toUpperCase() !== 'COD'">Original payment method</option>
+              <option value="BKASH">bKash</option>
+              <option value="NAGAD">Nagad</option>
+              <option value="ROCKET">Rocket</option>
+              <option value="BANK">Bank transfer</option>
+              <option value="WALLET">Rural Mart wallet</option>
+            </select>
+          </div>
+          <ng-container *ngIf="requiresRefundAccount()">
+            <div class="form-group">
+              <label>Account number <span class="req">*</span></label>
+              <input [(ngModel)]="refundAccountNumber" maxlength="80" class="form-input" placeholder="01XXXXXXXXX or bank account">
+            </div>
+            <div class="form-group">
+              <label>Account holder name <span class="req">*</span></label>
+              <input [(ngModel)]="refundAccountName" maxlength="120" class="form-input" placeholder="Account holder name">
+            </div>
+            <div class="form-group" *ngIf="refundMethod === 'BANK'">
+              <label>Bank name <span class="req">*</span></label>
+              <input [(ngModel)]="refundBankName" maxlength="120" class="form-input" placeholder="Bank name">
+            </div>
+            <div class="form-group" *ngIf="refundMethod === 'BANK'">
+              <label>Branch</label>
+              <input [(ngModel)]="refundBranch" maxlength="120" class="form-input" placeholder="Branch name">
+            </div>
+          </ng-container>
+        </div>
+        <small class="refund-note">The admin will refund only to these customer-provided details.</small>
+      </div>
+
+      <div class="return-error" *ngIf="returnError">{{ returnError }}</div>
+
+      <div class="return-actions">
+        <button class="btn-cancel-return" (click)="closeReturnForm()">Cancel</button>
+        <button class="btn-submit-return" (click)="submitReturn()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Submitting...' : 'Submit Request' }}
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

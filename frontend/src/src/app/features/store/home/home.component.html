@@ -1,0 +1,163 @@
+<app-site-header (searchEvent)="onSearch($event)" (categorySelected)="onCategorySelected($event)"></app-site-header>
+
+<section class="rm-home">
+  <section class="hero-shell" *ngIf="selectedCategory === 'all' && !searchTerm">
+    <div class="hero-copy">
+      <span class="hero-kicker">🌿 Pure • Fresh • Local</span>
+      <h1>Pure Goodness<br>From Our Villages</h1>
+      <p>Fresh, natural and authentic products sourced directly from local farmers and rural artisans to your doorstep.</p>
+
+      <div class="hero-actions">
+        <button class="btn primary" type="button" (click)="scrollToProducts()">Shop Now <span>→</span></button>
+        <button class="btn soft" type="button" (click)="onCategorySelected('all')">Explore Categories</button>
+      </div>
+
+      <div class="hero-rating">
+        <div class="avatar-stack"><span>01</span><span>02</span><span>03</span></div>
+        <div>
+          <strong>5K+ Happy Customers</strong>
+          <small>★★★★★ 4.8 rating</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="visual-panel clean-farm-card">
+        <div class="visual-top-badges">
+          <span>🚜 Supporting Farmers</span>
+          <span>✓ Chemical Free</span>
+        </div>
+
+        <div class="produce-stage">
+          <span class="produce-item">🥬</span>
+          <span class="produce-item main">🍅</span>
+          <span class="produce-item">🥕</span>
+        </div>
+
+        <div class="basket-card">
+          <span class="basket-icon"><img src="assets/Rural_mart_logo_icon.png" alt="Rural Mart logo"></span>
+          <h3>Farm Fresh Basket</h3>
+          <p>Picked today • Delivered fast</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust-bar">
+      <div><span>🌱</span><b>Farm Fresh</b><small>Direct from farmers</small></div>
+      <div><span>🛡️</span><b>Safe & Healthy</b><small>Chemical free</small></div>
+      <div><span>💳</span><b>Secure Payment</b><small>100% secure</small></div>
+      <div><span>🚚</span><b>Fast Delivery</b><small>On time, every time</small></div>
+    </div>
+  </section>
+
+  <app-category-nav
+    [activeId]="selectedCategory"
+    (categorySelected)="onCategorySelected($event)">
+  </app-category-nav>
+
+  <section class="deal-row" *ngIf="selectedCategory === 'all' && !searchTerm">
+    <article class="deal-card fruit">
+      <div>
+        <span>Organic Fruits</span>
+        <h3>Up to 25% Off</h3>
+        <button type="button" (click)="scrollToProducts()">Shop Now →</button>
+      </div>
+      <strong>🥭</strong>
+    </article>
+
+    <article class="deal-card delivery">
+      <div>
+        <span>Mega Offer</span>
+        <h3>Free Delivery</h3>
+        <p>On orders over ৳2,000</p>
+      </div>
+      <strong>🚚</strong>
+    </article>
+
+    <article class="deal-card sale">
+      <div>
+        <span>Flash Sale</span>
+        <h3>Up to 40% Off</h3>
+        <p>Limited time only</p>
+      </div>
+      <div class="timer"><b>02</b><small>Hrs</small></div>
+      <div class="timer"><b>45</b><small>Min</small></div>
+    </article>
+  </section>
+
+  <main class="products-section" id="products-section">
+    <div class="section-header">
+      <div>
+        <span class="section-kicker">Rural Mart Store</span>
+        <h2>
+          <ng-container *ngIf="!searchTerm && selectedCategory === 'all'">Featured Products</ng-container>
+          <ng-container *ngIf="searchTerm">Search Results for “{{ searchTerm }}”</ng-container>
+          <ng-container *ngIf="!searchTerm && selectedCategory !== 'all'">{{ activeCategoryName }}</ng-container>
+        </h2>
+      </div>
+
+      <div class="section-actions">
+        <select [(ngModel)]="sortBy" (change)="applySort()">
+          <option value="default">Default Sorting</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="name">Name A-Z</option>
+        </select>
+        <button type="button" *ngIf="searchTerm || selectedCategory !== 'all'" (click)="clearSearch()">Clear</button>
+      </div>
+    </div>
+
+    <div class="status-card" *ngIf="isLoading">Loading products...</div>
+    <div class="status-card error" *ngIf="errorMsg">{{ errorMsg }}</div>
+    <div class="status-card" *ngIf="!isLoading && filteredProducts.length === 0">
+      No product found. Try another category or search keyword.
+    </div>
+
+    <div class="product-grid" *ngIf="!isLoading && filteredProducts.length > 0">
+      <app-product-card
+        *ngFor="let product of filteredProducts; let i = index"
+        [product]="product"
+        [index]="i"
+        (addedToCart)="onAddedToCart()"
+        (wishlistChanged)="onWishlistChanged($event)">
+      </app-product-card>
+    </div>
+  </main>
+
+  <section class="why-row" *ngIf="selectedCategory === 'all' && !searchTerm">
+    <div><span>🌾</span><h4>Local Sourcing</h4><p>Products from rural farmers and artisans.</p></div>
+    <div><span>↻</span><h4>Easy Returns</h4><p>Simple 7-day return policy.</p></div>
+    <div><span>🎧</span><h4>24/7 Support</h4><p>Support whenever you need it.</p></div>
+    <div><span>🎁</span><h4>Exclusive Deals</h4><p>Special discounts every week.</p></div>
+  </section>
+</section>
+
+<footer class="store-footer">
+  <div class="store-footer-main">
+    <a routerLink="/" class="store-footer-logo" aria-label="Rural Mart home">
+      <img src="assets/Rural_mart_logo_full.png" alt="Rural Mart">
+    </a>
+
+    <p class="store-footer-text">Fresh rural products from trusted farmers and artisans.</p>
+
+    <nav class="store-footer-links" aria-label="Footer navigation">
+      <button type="button" (click)="scrollToProducts()">Shop Products</button>
+      <a routerLink="/my-orders">My Orders</a>
+      <a routerLink="/seller/apply">Become a Seller</a>
+    </nav>
+
+    <div class="store-footer-contact">
+      <a href="tel:+8801700000000">☎ +880 1700-000000</a>
+      <a href="mailto:support@ruralmart.com">✉ support@ruralmart.com</a>
+    </div>
+  </div>
+
+  <div class="store-footer-bottom">
+    <span>© 2026 Rural Mart. All rights reserved.</span>
+    <span>Made in Bangladesh 🇧🇩</span>
+  </div>
+</footer>
+
+<app-cart-modal></app-cart-modal>
+
+<div class="toast" *ngIf="showToast">{{ toastMessage }}</div>

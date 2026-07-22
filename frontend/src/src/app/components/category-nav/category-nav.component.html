@@ -1,0 +1,28 @@
+<section class="category-nav-wrapper">
+  <div class="cat-heading">
+    <div>
+      <span class="section-kicker">Shop by</span>
+      <h2>Popular Categories</h2>
+    </div>
+    <button class="view-all" type="button" (click)="selectCategory('all')">View All →</button>
+  </div>
+
+  <div class="cat-scroll-container">
+    <div class="cat-inner" #scrollContainer>
+      <button class="cat-item" type="button" [class.active]="activeId === 'all'" (click)="selectCategory('all')">
+        <span class="cat-icon">▦</span>
+        <span>All Products</span>
+      </button>
+
+      <button
+        class="cat-item"
+        type="button"
+        *ngFor="let cat of categories"
+        [class.active]="activeId === cat.id"
+        (click)="selectCategory(cat)">
+        <span class="cat-icon">{{ getIcon(cat) }}</span>
+        <span>{{ cat.name }}</span>
+      </button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,27 @@
+Rural Mart Angular Frontend Structure
+
+src/app/
+├── core/
+│   ├── guards/              # AuthGuard, AdminGuard
+│   ├── interceptors/        # JWT interceptor
+│   ├── models/              # TypeScript interfaces/models
+│   └── services/            # API and state services
+├── shared/
+│   └── components/          # Reusable UI: site header, category nav, product card, cart modal
+├── layout/                  # Admin/Seller layout, sidebar, navbar, footer
+├── features/
+│   ├── store/               # Public/customer pages: home, login, register, checkout, profile
+│   └── admin/               # Admin and seller management screens
+├── app-routing.module.ts
+├── app.module.ts
+└── app.component.*
+
+Cleanup completed:
+- Previous brand references changed to Rural Mart.
+- Order prefix changed to RM.
+- Duplicate legacy vendor module removed; Vendor / Seller Center remains in dashboard.
+- Unused addition CSS files removed.
+- Auth guard, interceptor, services and models moved under core.
+- Reusable components moved under shared/components.
+- Public pages moved under features/store.
+- Admin and seller management screens moved under features/admin.

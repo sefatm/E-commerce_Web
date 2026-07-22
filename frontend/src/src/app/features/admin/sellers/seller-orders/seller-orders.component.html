@@ -1,0 +1,121 @@
+<div class="seller-orders-page">
+  <div class="page-hero">
+    <div>
+      <p class="eyebrow">Seller Workspace</p>
+      <h1>Order Management</h1>
+      <p>Manage customer orders, filter by status, and move each order through the delivery flow.</p>
+    </div>
+    <button type="button" class="refresh-btn" (click)="loadOrders()" [disabled]="isLoading">
+      {{ isLoading ? 'Loading...' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div class="seller-strip" *ngIf="seller">
+    <div>
+      <span>Shop</span>
+      <strong>{{ seller.shopName || seller.name }}</strong>
+    </div>
+    <div>
+      <span>Area</span>
+      <strong>{{ seller.district || 'Not set' }}</strong>
+    </div>
+    <div>
+      <span>Total Orders</span>
+      <strong>{{ orders.length }}</strong>
+    </div>
+  </div>
+
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="status-grid">
+    <button
+      type="button"
+      *ngFor="let status of statusList"
+      [class.active]="selectedStatus === status"
+      (click)="setStatusFilter(status)">
+      <span>{{ status }}</span>
+      <strong>{{ countByStatus(status) }}</strong>
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <input
+      type="text"
+      placeholder="Search order code, customer, phone, product..."
+      [(ngModel)]="searchTerm"
+      (input)="applyFilter()">
+    <select [(ngModel)]="selectedStatus" (change)="applyFilter()">
+      <option *ngFor="let status of statusList" [value]="status">{{ status }}</option>
+    </select>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">Loading seller orders...</div>
+
+  <div class="orders-list" *ngIf="!isLoading">
+    <article class="order-card" *ngFor="let order of filteredOrders">
+      <div class="order-main">
+        <div>
+          <span class="order-code">{{ order.orderCode }}</span>
+          <h2>{{ order.customerName || 'Customer' }}</h2>
+          <p>{{ order.customerPhone || 'No phone' }} · {{ order.shippingAddress || 'No address' }}</p>
+        </div>
+        <span class="status-pill" [ngClass]="statusClass(order.status)">{{ order.status || 'PENDING' }}</span>
+      </div>
+
+      <div class="order-meta">
+        <div>
+          <span>Items</span>
+          <strong>{{ order.items?.length || 0 }}</strong>
+        </div>
+        <div>
+          <span>Total</span>
+          <strong>&#x09F3;{{ totalAmount(order) | number:'1.2-2' }}</strong>
+        </div>
+        <div>
+          <span>Payment</span>
+          <strong>{{ order.paymentMethod || '-' }}</strong>
+        </div>
+        <div>
+          <span>Date</span>
+          <strong>{{ order.orderDate | date:'dd MMM yy' }}</strong>
+        </div>
+      </div>
+
+      <div class="item-list" *ngIf="order.items?.length">
+        <div class="item-row" *ngFor="let item of order.items">
+          <span>{{ item.productName }}</span>
+          <strong>{{ item.quantity || 1 }} x &#x09F3;{{ (item.price || 0) | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="order-actions">
+        <select [ngModel]="order.status || 'PENDING'" (ngModelChange)="updateOrderStatus(order, $event)">
+          <option *ngFor="let status of availableOrderStatuses(order)" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+
+        <button
+          type="button"
+          class="next-btn"
+          *ngIf="getNextStatus(order.status)"
+          (click)="updateOrderStatus(order, getNextStatus(order.status))">
+          Mark {{ getNextStatus(order.status) }}
+        </button>
+
+        <button
+          type="button"
+          class="cancel-btn"
+          *ngIf="order.status !== 'DELIVERED' && order.status !== 'CANCELLED'"
+          (click)="updateOrderStatus(order, 'CANCELLED')">
+          Cancel
+        </button>
+      </div>
+    </article>
+
+    <div class="empty-state" *ngIf="filteredOrders.length === 0">
+      No seller orders found for this filter.
+    </div>
+  </div>
+</div>

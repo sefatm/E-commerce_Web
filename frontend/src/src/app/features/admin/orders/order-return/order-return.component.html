@@ -1,0 +1,169 @@
+<div class="return-page">
+
+  <div class="page-header">
+    <div>
+      <h2>Return Requests</h2>
+      <p>{{ getPendingCount() }} pending requests</p>
+    </div>
+  </div>
+
+  <div class="return-summary">
+    <div class="summary-card pending">
+      <span>Pending</span>
+      <strong>{{ getPendingCount() }}</strong>
+    </div>
+    <div class="summary-card approved">
+      <span>Approved</span>
+      <strong>{{ getApprovedCount() }}</strong>
+    </div>
+    <div class="summary-card rejected">
+      <span>Rejected</span>
+      <strong>{{ getRejectedCount() }}</strong>
+    </div>
+  </div>
+
+  <div class="alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="filter-bar">
+    <div class="return-search">
+      <input
+        type="text"
+        [(ngModel)]="searchKeyword"
+        (input)="applyFilter()"
+        placeholder="Search order code, customer, product, reason...">
+      <button type="button" *ngIf="searchKeyword" (click)="clearSearch()">Clear</button>
+    </div>
+    <button *ngFor="let s of statusList"
+      [class.active]="selectedStatus === s"
+      (click)="selectedStatus = s; applyFilter()">
+      {{ s }}
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">Loading return requests...</div>
+
+  <div class="table-card" *ngIf="!isLoading">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Order Code</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Reason</th>
+            <th>Return</th>
+            <th>Payment</th>
+            <th>Refund</th>
+            <th>Requested</th>
+            <th>Admin Note</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of filteredReturns; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td><span class="order-code">{{ r.order?.orderCode }}</span></td>
+            <td>{{ r.order?.customerName }}</td>
+            <td>{{ r.productName }}</td>
+            <td class="reason-cell">{{ r.reason }}</td>
+            <td>
+              <span class="ret-badge"
+                [class.ret-pending]="r.status === 'PENDING'"
+                [class.ret-approved]="r.status === 'APPROVED'"
+                [class.ret-rejected]="r.status === 'REJECTED'">
+                {{ r.status }}
+              </span>
+            </td>
+            <td>
+              <span class="pay-badge" [class.pay-refunded]="r.order?.paymentStatus === 'REFUNDED'">
+                {{ r.order?.paymentStatus || 'UNPAID' }}
+              </span>
+            </td>
+            <td>
+              <div class="refund-cell">
+                <strong>&#x09F3;{{ r.refundAmount || 0 }}</strong>
+                <span
+                  [class.refund-done]="r.refundStatus === 'PROCESSED'"
+                  [class.refund-pending]="r.refundStatus !== 'PROCESSED'">
+                  {{ r.refundStatus || 'PENDING' }}
+                </span>
+              </div>
+            </td>
+            <td>{{ r.requestDate | date:'dd MMM yy' }}</td>
+            <td class="note-cell">{{ r.adminNote || '-' }}</td>
+            <td class="actions">
+              <ng-container *ngIf="r.status === 'PENDING'">
+              <button class="btn-action btn-approve" (click)="openApprove(r)">
+                Approve Return
+              </button>
+                <button class="btn-action btn-reject" (click)="openReject(r)">
+                  Reject
+                </button>
+              </ng-container>
+              <button class="btn-action btn-approve" *ngIf="r.status === 'APPROVED'" (click)="advance(r, 'RETURN_PICKED')">Mark Picked</button>
+              <button class="btn-action btn-approve" *ngIf="r.status === 'RETURN_PICKED'" (click)="advance(r, 'ITEM_RECEIVED')">Item Received</button>
+              <button class="btn-action btn-approve" *ngIf="r.status === 'ITEM_RECEIVED'" (click)="advance(r, 'REFUND_INITIATED')">Start Refund</button>
+              <button class="btn-action btn-approve" *ngIf="r.status === 'REFUND_INITIATED'" (click)="advance(r, 'REFUNDED')">Complete Refund</button>
+              <button class="btn-action btn-delete" (click)="deleteReturn(r.id!)">Delete</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredReturns.length === 0">
+            <td colspan="11" class="empty">No return requests found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="selectedReturn" (click)="closeModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h3 *ngIf="actionMode === 'approve'">Approve Return</h3>
+      <h3 *ngIf="actionMode === 'reject'">Reject Return Request</h3>
+      <p>
+        {{ selectedReturn.order?.orderCode }} -
+        {{ selectedReturn.productName }}
+      </p>
+
+      <div class="refund-form-grid" *ngIf="actionMode === 'approve'">
+        <label>
+          Refund amount
+          <input type="number" [(ngModel)]="refundAmount" min="1">
+        </label>
+        <label>
+          Customer refund method
+          <input [value]="selectedReturn.refundMethod || 'Not provided'" readonly>
+        </label>
+        <label *ngIf="selectedReturn.refundMethod !== 'ORIGINAL_PAYMENT'">
+          Refund account
+          <input [value]="selectedReturn.refundAccountNumber || 'Not provided'" readonly>
+        </label>
+        <label *ngIf="selectedReturn.refundMethod !== 'ORIGINAL_PAYMENT'">
+          Account holder
+          <input [value]="selectedReturn.refundAccountName || 'Not provided'" readonly>
+        </label>
+        <label *ngIf="selectedReturn.refundMethod === 'BANK'">
+          Bank / Branch
+          <input [value]="(selectedReturn.refundBankName || '') + (selectedReturn.refundBranch ? ' - ' + selectedReturn.refundBranch : '')" readonly>
+        </label>
+      </div>
+
+      <textarea
+        [(ngModel)]="noteText"
+        rows="3"
+        [placeholder]="actionMode === 'approve' ? 'e.g. Product issue verified and refund processed' : 'Write rejection reason'">
+      </textarea>
+      <div class="modal-actions">
+        <button class="btn btn-primary" *ngIf="actionMode === 'approve'" [disabled]="isProcessingAction" (click)="approve(selectedReturn.id!)">
+          {{ isProcessingAction ? 'Processing...' : 'Approve Return' }}
+        </button>
+        <button class="btn btn-danger" *ngIf="actionMode === 'reject'" [disabled]="isProcessingAction" (click)="reject(selectedReturn.id!)">
+          {{ isProcessingAction ? 'Processing...' : 'Reject Return' }}
+        </button>
+        <button class="btn btn-outline" [disabled]="isProcessingAction" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>

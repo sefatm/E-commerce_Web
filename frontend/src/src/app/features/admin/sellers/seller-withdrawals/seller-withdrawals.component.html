@@ -1,0 +1,75 @@
+<div class="withdraw-page">
+  <div class="page-header">
+    <div>
+      <h1>Seller Withdrawals</h1>
+      <p>Approve or reject seller payment requests.</p>
+    </div>
+    <select [(ngModel)]="status" (change)="applyFilter()">
+      <option value="">All status</option>
+      <option value="PENDING">PENDING</option>
+      <option value="PAID">PAID</option>
+      <option value="REJECTED">REJECTED</option>
+    </select>
+  </div>
+
+  <div class="message" *ngIf="message">{{ message }}</div>
+  <div class="loading" *ngIf="isLoading">Loading withdrawals...</div>
+
+  <div class="table-card" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>Seller</th>
+          <th>Amount</th>
+          <th>Method</th>
+          <th>Account</th>
+          <th>Status</th>
+          <th>Requested</th>
+          <th>Transaction</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let w of filtered">
+          <td>
+            <strong>{{ w.seller?.shopName || w.seller?.name }}</strong>
+            <small>{{ w.seller?.email || w.seller?.phone }}</small>
+          </td>
+          <td>&#x09F3;{{ (w.amount || 0) | number:'1.2-2' }}</td>
+          <td>{{ w.paymentMethod }}</td>
+          <td>{{ w.accountName }}<br><small>{{ w.accountNumber }}</small></td>
+          <td><span class="pill" [class.paid]="w.status === 'PAID'" [class.rejected]="w.status === 'REJECTED'">{{ w.status }}</span></td>
+          <td>{{ w.requestDate | date:'dd MMM yy' }}</td>
+          <td>{{ w.transactionRef || '-' }}</td>
+          <td class="actions">
+            <button *ngIf="w.status === 'PENDING'" class="approve" (click)="openApprove(w)">Pay</button>
+            <button *ngIf="w.status === 'PENDING'" class="reject" (click)="reject(w)">Reject</button>
+            <button class="delete" (click)="delete(w)">Delete</button>
+          </td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="8" class="empty">No withdrawal requests found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal-overlay" *ngIf="approveTarget" (click)="approveTarget = null">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>Mark Withdrawal Paid</h2>
+      <p>{{ approveTarget.seller?.shopName || approveTarget.seller?.name }} - &#x09F3;{{ (approveTarget.amount || 0) | number:'1.2-2' }}</p>
+      <label>
+        <span>Transaction Reference</span>
+        <input type="text" [(ngModel)]="approveData.transactionRef">
+      </label>
+      <label>
+        <span>Admin Note</span>
+        <textarea rows="3" [(ngModel)]="approveData.note"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button class="approve" (click)="approve()">Confirm Paid</button>
+        <button class="delete" (click)="approveTarget = null">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

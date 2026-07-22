@@ -1,0 +1,27 @@
+.withdraw-page { padding: 24px; background: #f8fafc; min-height: 100%; }
+.page-header { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 18px; }
+h1 { margin: 0; color: #111827; }
+.page-header p { margin: 5px 0 0; color: #64748b; }
+select, input, textarea { border: 1px solid #d8dde6; border-radius: 8px; padding: 10px 12px; font: inherit; }
+.message, .loading { background: #fff; border: 1px solid #e8edf2; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; color: #475569; }
+.table-card { background: #fff; border: 1px solid #e8edf2; border-radius: 10px; overflow: auto; box-shadow: 0 10px 28px rgba(15,23,42,0.04); }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px 14px; border-bottom: 1px solid #eef2f7; text-align: left; color: #334155; font-size: 13px; vertical-align: middle; }
+th { background: #f8fafc; color: #64748b; text-transform: uppercase; font-size: 11px; }
+td small { display: block; margin-top: 3px; color: #64748b; }
+.pill { display: inline-flex; padding: 4px 9px; border-radius: 999px; background: #fff7ed; color: #9a3412; font-size: 11px; font-weight: 800; }
+.pill.paid { background: #dcfce7; color: #166534; }
+.pill.rejected { background: #fee2e2; color: #991b1b; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; }
+button { border: none; border-radius: 7px; padding: 8px 11px; font-weight: 800; cursor: pointer; }
+.approve { background: #047857; color: #fff; }
+.reject { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+.delete { background: #f1f5f9; color: #475569; }
+.empty { text-align: center; color: #94a3b8; padding: 34px !important; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.45); display: flex; align-items: center; justify-content: center; z-index: 3000; }
+.modal { display: block; position: relative; width: 430px; max-width: 92vw; background: #fff; border-radius: 12px; padding: 22px; box-shadow: 0 20px 60px rgba(15,23,42,.22); }
+.modal h2 { margin: 0 0 8px; color: #111827; }
+.modal p { margin: 0 0 16px; color: #64748b; }
+.modal label { display: grid; gap: 7px; margin-bottom: 12px; color: #475569; font-weight: 800; font-size: 13px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+@media (max-width: 720px) { .page-header { align-items: stretch; flex-direction: column; } }

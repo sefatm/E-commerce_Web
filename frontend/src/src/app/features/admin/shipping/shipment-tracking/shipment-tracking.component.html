@@ -1,0 +1,197 @@
+<!-- shipment-tracking.component.html -->
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Shipment Tracking</h1>
+      <p class="page-sub">Track the delivery status of all orders here.</p>
+    </div>
+    <button class="btn-primary" (click)="showAddForm = !showAddForm">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      {{ showAddForm ? 'Cancel' : 'Add Shipment' }}
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-row" *ngIf="stats">
+    <div class="stat-chip" (click)="filterByStatus('')" [class.selected]="activeFilter === ''">
+      <div class="chip-num">{{ stats.total }}</div>
+      <div class="chip-label">Total</div>
+    </div>
+    <div class="stat-chip pending" (click)="filterByStatus('pending')" [class.selected]="activeFilter === 'pending'">
+      <div class="chip-num">{{ stats.pending }}</div>
+      <div class="chip-label">Pending</div>
+    </div>
+    <div class="stat-chip picked" (click)="filterByStatus('picked_up')" [class.selected]="activeFilter === 'picked_up'">
+      <div class="chip-num">{{ stats.pickedUp }}</div>
+      <div class="chip-label">Picked Up</div>
+    </div>
+    <div class="stat-chip transit" (click)="filterByStatus('in_transit')" [class.selected]="activeFilter === 'in_transit'">
+      <div class="chip-num">{{ stats.inTransit }}</div>
+      <div class="chip-label">In Transit</div>
+    </div>
+    <div class="stat-chip out" (click)="filterByStatus('out_for_delivery')" [class.selected]="activeFilter === 'out_for_delivery'">
+      <div class="chip-num">{{ stats.outForDelivery }}</div>
+      <div class="chip-label">Out for Delivery</div>
+    </div>
+    <div class="stat-chip delivered" (click)="filterByStatus('delivered')" [class.selected]="activeFilter === 'delivered'">
+      <div class="chip-num">{{ stats.delivered }}</div>
+      <div class="chip-label">Delivered</div>
+    </div>
+    <div class="stat-chip failed" (click)="filterByStatus('failed')" [class.selected]="activeFilter === 'failed'">
+      <div class="chip-num">{{ stats.failed }}</div>
+      <div class="chip-label">Failed</div>
+    </div>
+  </div>
+
+  <!-- Add Shipment Form -->
+  <div class="form-card" *ngIf="showAddForm">
+    <div class="card-head">
+      <div class="card-icon amber">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+          <rect x="1" y="1" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M9 4h3.5L14 7v4h-5V4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+          <circle cx="4" cy="12.5" r="1.3" fill="currentColor"/>
+          <circle cx="11.5" cy="12.5" r="1.3" fill="currentColor"/>
+        </svg>
+      </div>
+      <span class="card-title">New Shipment</span>
+    </div>
+    <form (ngSubmit)="addShipment()" #shipForm="ngForm">
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label required">Order ID</label>
+          <input type="number" class="form-input" [(ngModel)]="addForm.orderId" name="orderId" required placeholder="e.g. 1001"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Recipient Name</label>
+          <input type="text" class="form-input" [(ngModel)]="addForm.recipientName" name="recipientName" required placeholder="Customer name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Phone</label>
+          <input type="text" class="form-input" [(ngModel)]="addForm.recipientPhone" name="recipientPhone" required placeholder="01XXXXXXXXX"/>
+        </div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label required">Delivery Method</label>
+          <select class="form-select" [(ngModel)]="addForm.methodId" name="methodId" required>
+            <option value="">Select method</option>
+            <option *ngFor="let m of allMethods" [value]="m.id">{{ m.name }} — ৳{{ m.charge }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">District</label>
+          <input type="text" class="form-input" [(ngModel)]="addForm.district" name="district" placeholder="e.g. Dhaka"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estimated Delivery</label>
+          <input type="date" class="form-input" [(ngModel)]="addForm.estimatedDelivery" name="estimatedDelivery"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label required">Shipping Address</label>
+        <input type="text" class="form-input" [(ngModel)]="addForm.shippingAddress" name="shippingAddress" required placeholder="Full address"/>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary" [disabled]="shipForm.invalid || isSubmitting">
+          {{ isSubmitting ? 'Creating...' : 'Create Shipment' }}
+        </button>
+        <button type="button" class="btn-outline" (click)="showAddForm = false">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="9.5" y1="9.5" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <input type="text" class="search-input" [(ngModel)]="searchTerm"
+        (ngModelChange)="applySearch()" placeholder="Search by tracking no, name, district..."/>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div><p>Loading shipments...</p>
+  </div>
+
+  <!-- Empty -->
+  <div class="empty-state" *ngIf="!isLoading && filteredList.length === 0">
+    <p class="empty-text">No shipments found.</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card" *ngIf="!isLoading && filteredList.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Tracking No.</th>
+          <th>Order</th>
+          <th>Recipient</th>
+          <th>Carrier</th>
+          <th>District</th>
+          <th>Charge</th>
+          <th>Est. Delivery</th>
+          <th>Status</th>
+          <th>Update Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let t of filteredList">
+          <td>
+            <span class="tracking-num">{{ t.trackingNumber }}</span>
+          </td>
+          <td><span class="order-id">#{{ t.orderId }}</span></td>
+          <td>
+            <div class="recipient-cell">
+              <div class="r-avatar">{{ t.recipientName?.charAt(0) }}</div>
+              <div>
+                <div class="r-name">{{ t.recipientName }}</div>
+                <div class="r-phone">{{ t.recipientPhone }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ t.carrier || '—' }}</td>
+          <td>{{ t.district || '—' }}</td>
+          <td>৳{{ t.shippingCharge || 0 }}</td>
+          <td>
+            <span *ngIf="t.estimatedDelivery">{{ t.estimatedDelivery | date:'MMM d' }}</span>
+            <span *ngIf="!t.estimatedDelivery" class="muted">—</span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="'s-' + t.status">
+              {{ getStatusLabel(t.status) }}
+            </span>
+          </td>
+          <td>
+            <select class="status-select" [value]="t.status"
+              (change)="onStatusChange(t.id, $event)">
+              <option value="pending">Pending</option>
+              <option value="picked_up">Picked Up</option>
+              <option value="in_transit">In Transit</option>
+              <option value="out_for_delivery">Out for Delivery</option>
+              <option value="delivered">Delivered</option>
+              <option value="failed">Failed</option>
+              <option value="returned">Returned</option>
+            </select>
+          </td>
+          <td>
+            <button class="icon-btn danger" title="Delete" (click)="deleteTracking(t.id)">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 3.5h9M5 3.5V2h3v1.5M4.5 3.5v6a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

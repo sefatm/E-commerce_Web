@@ -1,0 +1,178 @@
+<div class="review-page">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Seller Verification</span>
+      <h1>Seller Approvals</h1>
+      <p>{{ sellers.length }} pending applications with full profile, business and document details.</p>
+    </div>
+    <button class="refresh-btn" (click)="loadPending()">Refresh</button>
+  </div>
+
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="loading" *ngIf="isLoading">Loading seller applications...</div>
+
+  <div class="empty-state" *ngIf="!isLoading && sellers.length === 0">
+    No pending seller applications.
+  </div>
+
+  <div class="review-grid" *ngIf="!isLoading && sellers.length > 0">
+    <article class="review-card" *ngFor="let seller of sellers; trackBy: trackBySellerId">
+      <div class="card-top">
+        <div class="seller-title">
+          <span class="shop-icon">RM</span>
+          <div>
+            <h2>{{ seller.shopName || seller.name || 'Seller Application' }}</h2>
+            <p>{{ ownerName(seller) }} · {{ seller.district || 'District not set' }}</p>
+          </div>
+        </div>
+        <span class="status">{{ seller.status || 'PENDING' }}</span>
+      </div>
+
+      <div class="section-card">
+        <h3>Owner Information</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Owner Name</span>
+            <strong>{{ ownerName(seller) }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Email</span>
+            <strong>{{ seller.email || seller.user?.email || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Phone</span>
+            <strong>{{ seller.phone || seller.user?.phone || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>NID Number</span>
+            <strong>{{ seller.nidNo || 'N/A' }}</strong>
+          </div>
+          <div class="info-item wide">
+            <span>Address</span>
+            <strong>{{ seller.address || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Applied Date</span>
+            <strong>{{ seller.createdAt ? (seller.createdAt | date:'mediumDate') : 'N/A' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3>Business Details</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Shop / Farm Name</span>
+            <strong>{{ seller.shopName || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Business Type</span>
+            <strong>{{ seller.businessType || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Product Category</span>
+            <strong>{{ seller.productCategory || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Commission</span>
+            <strong>{{ seller.commissionRate || 10 }}%</strong>
+          </div>
+          <div class="info-item">
+            <span>Payment Method</span>
+            <strong>{{ seller.paymentMethod || 'N/A' }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Payment Number</span>
+            <strong>{{ seller.paymentNumber || 'N/A' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card documents-card">
+        <h3>Uploaded Documents</h3>
+        <div class="document-grid" *ngIf="hasAnyDocument(seller); else noDocuments">
+          <a class="doc-tile" *ngIf="seller.profilePhoto" [href]="fileUrl(seller.profilePhoto)" target="_blank" rel="noopener">
+            <ng-container *ngIf="!isPdf(seller.profilePhoto); else profilePdf">
+              <img [src]="fileUrl(seller.profilePhoto)" alt="Seller profile photo">
+            </ng-container>
+            <ng-template #profilePdf><div class="pdf-box">PDF</div></ng-template>
+            <span>Seller Photo</span>
+          </a>
+
+          <a class="doc-tile" *ngIf="seller.nidFrontImage" [href]="fileUrl(seller.nidFrontImage)" target="_blank" rel="noopener">
+            <ng-container *ngIf="!isPdf(seller.nidFrontImage); else nidFrontPdf">
+              <img [src]="fileUrl(seller.nidFrontImage)" alt="NID front image">
+            </ng-container>
+            <ng-template #nidFrontPdf><div class="pdf-box">PDF</div></ng-template>
+            <span>NID Front</span>
+          </a>
+
+          <a class="doc-tile" *ngIf="seller.nidBackImage" [href]="fileUrl(seller.nidBackImage)" target="_blank" rel="noopener">
+            <ng-container *ngIf="!isPdf(seller.nidBackImage); else nidBackPdf">
+              <img [src]="fileUrl(seller.nidBackImage)" alt="NID back image">
+            </ng-container>
+            <ng-template #nidBackPdf><div class="pdf-box">PDF</div></ng-template>
+            <span>NID Back</span>
+          </a>
+        </div>
+        <ng-template #noDocuments>
+          <p class="empty-doc">No uploaded document found for this seller.</p>
+        </ng-template>
+      </div>
+
+      <div class="story-grid">
+        <div class="story-block">
+          <h3>Seller / Artisan Story</h3>
+          <p>{{ seller.artisanStory || 'No story provided.' }}</p>
+        </div>
+
+        <div class="story-block">
+          <h3>Craft / Delivery Process</h3>
+          <p>{{ seller.craftProcess || 'No process provided.' }}</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="reject-btn" (click)="openReject(seller)" [disabled]="isSubmitting">Reject</button>
+        <button class="approve-btn" (click)="approve(seller.id)" [disabled]="isSubmitting">Approve</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="rejectTarget" (click)="closeReject()">
+    <div class="reject-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <span>Seller verification decision</span>
+          <h2>Reject {{ rejectTarget.shopName || rejectTarget.name }}</h2>
+        </div>
+        <button type="button" class="close-btn" (click)="closeReject()">×</button>
+      </div>
+
+      <div class="reject-summary">
+        <p><strong>Owner:</strong> {{ ownerName(rejectTarget) }}</p>
+        <p><strong>Phone:</strong> {{ rejectTarget.phone || 'N/A' }}</p>
+        <p><strong>NID:</strong> {{ rejectTarget.nidNo || 'N/A' }}</p>
+      </div>
+
+      <label class="reason-field">
+        <span>Reject reason</span>
+        <textarea
+          rows="4"
+          [(ngModel)]="rejectReason"
+          placeholder="Example: NID or shop information could not be verified.">
+        </textarea>
+      </label>
+      <small class="field-error" *ngIf="rejectError">{{ rejectError }}</small>
+
+      <div class="modal-actions">
+        <button type="button" class="refresh-btn" (click)="closeReject()">Cancel</button>
+        <button type="button" class="reject-btn" (click)="reject()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Rejecting...' : 'Confirm Reject' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

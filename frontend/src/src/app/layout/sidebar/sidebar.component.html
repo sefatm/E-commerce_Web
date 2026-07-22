@@ -1,0 +1,197 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+
+  <div class="sidebar-logo" routerLink="/" style="cursor:pointer" title="Go to Homepage">
+    <div class="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M10 2L3 6v8l7 4 7-4V6L10 2z" fill="currentColor" opacity="0.9"/>
+        <path d="M10 2v12M3 6l7 4 7-4" stroke="white" stroke-width="1.2" opacity="0.5"/>
+      </svg>
+    </div>
+    <span class="logo-text">Rural-Mart</span>
+    <span class="logo-badge">{{ roleLabel() }}</span>
+  </div>
+
+  <!-- =================== ADMIN NAV =================== -->
+  <nav class="sidebar-nav" *ngIf="isAdmin()">
+
+    <div class="nav-section">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">Catalog</div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'products'" (click)="toggle('products')">
+        <span class="nav-icon"><i class="fa-solid fa-box-open"></i></span>
+        <span class="nav-label">Products</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'products'">
+        <a routerLink="/admin/list" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>All Products</a>
+        <a routerLink="/admin/products/approvals" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Product Approvals</a>
+        <a routerLink="/admin/categories" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Categories</a>
+        <a routerLink="/admin/brands" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Brands</a>
+      </div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'coupons'" (click)="toggle('coupons')">
+        <span class="nav-icon"><i class="fa-solid fa-ticket"></i></span>
+        <span class="nav-label">Coupons & Offers</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'coupons'">
+        <a routerLink="/admin/coupons" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Coupons</a>
+        <a routerLink="/admin/offers" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Offers</a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">Sales</div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'orders'" (click)="toggle('orders')">
+        <span class="nav-icon"><i class="fa-solid fa-bag-shopping"></i></span>
+        <span class="nav-label">Orders</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'orders'">
+        <a routerLink="/admin/orders/list" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Order List</a>
+        <a routerLink="/admin/orders/payments" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Payments</a>
+        <a routerLink="/admin/commissions" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Commissions</a>
+        <a routerLink="/admin/orders/returns" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Returns</a>
+      </div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'shipping'" (click)="toggle('shipping')">
+        <span class="nav-icon"><i class="fa-solid fa-truck"></i></span>
+        <span class="nav-label">Shipping</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'shipping'">
+        <a routerLink="/admin/shipping-zones" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Zones</a>
+        <a routerLink="/admin/delivery-methods" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Methods</a>
+        <a routerLink="/admin/tracking" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Tracking</a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">People</div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'customers'" (click)="toggle('customers')">
+        <span class="nav-icon"><i class="fa-solid fa-users"></i></span>
+        <span class="nav-label">Customers</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'customers'">
+        <a routerLink="/admin/customers/list" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Customer List</a>
+        <a routerLink="/admin/customers/add" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Add Customer</a>
+      </div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'sellers'" (click)="toggle('sellers')">
+        <span class="nav-icon"><i class="fa-solid fa-store"></i></span>
+        <span class="nav-label">Sellers</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'sellers'">
+        <a routerLink="/admin/sellers/approvals" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Seller Approvals</a>
+        <a routerLink="/admin/sellers/withdrawals" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Withdrawals</a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">Insights</div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'reports'" (click)="toggle('reports')">
+        <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+        <span class="nav-label">Reports</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'reports'">
+        <a routerLink="/admin/reports/sales" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Sales Report</a>
+        <a routerLink="/admin/reports/revenue" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Revenue Report</a>
+        <a routerLink="/admin/reports/products" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Product Report</a>
+        <a routerLink="/admin/reports/customers" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Customer Report</a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">System</div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'settings'" (click)="toggle('settings')">
+        <span class="nav-icon"><i class="fa-solid fa-gear"></i></span>
+        <span class="nav-label">Settings</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'settings'">
+        <a routerLink="/admin/users/create-admin" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Admin Management</a>
+        <a routerLink="/admin/settings/general" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>General Settings</a>
+      </div>
+    </div>
+
+  </nav>
+
+  <!-- =================== SELLER NAV =================== -->
+  <nav class="sidebar-nav" *ngIf="isSeller()">
+
+    <div class="nav-section">
+      <a routerLink="/seller/dashboard" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>
+        <span class="nav-label">Seller Dashboard</span>
+      </a>
+      <a routerLink="/seller/orders" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-bag-shopping"></i></span>
+        <span class="nav-label">Orders</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">Catalog</div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'seller-products'" (click)="toggle('seller-products')">
+        <span class="nav-icon"><i class="fa-solid fa-box-open"></i></span>
+        <span class="nav-label">Products</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'seller-products'">
+        <a routerLink="/seller/add-product" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Add Product</a>
+        <a routerLink="/seller/products" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>My Products</a>
+        <a routerLink="/seller/inventory" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Inventory</a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">Earnings</div>
+
+      <div class="nav-item has-sub" [class.open]="openMenu === 'seller-money'" (click)="toggle('seller-money')">
+        <span class="nav-icon"><i class="fa-solid fa-wallet"></i></span>
+        <span class="nav-label">Finance</span>
+        <span class="nav-arrow"><i class="fa-solid fa-chevron-down"></i></span>
+      </div>
+      <div class="submenu" *ngIf="openMenu === 'seller-money'">
+        <a routerLink="/seller/commissions" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Commissions</a>
+        <a routerLink="/seller/withdrawals" routerLinkActive="sub-active" class="sub-item"><span class="sub-dot"></span>Withdrawals</a>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="section-title">Account</div>
+      <a routerLink="/seller/settings" routerLinkActive="active" class="nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-circle-user"></i></span>
+        <span class="nav-label">Profile Settings</span>
+      </a>
+    </div>
+
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">{{ userInitials() }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ userName() }}</div>
+        <div class="user-role">{{ roleLabel() }}</div>
+      </div>
+      <div class="user-logout">&#8617;</div>
+    </div>
+  </div>
+
+</div>

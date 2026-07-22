@@ -1,0 +1,77 @@
+<div class="auth-page login-page">
+  <a class="back-home" routerLink="/">← Back to Home</a>
+
+  <section class="auth-shell">
+    <aside class="auth-visual">
+      <div class="brand-mini"><span>RM</span> Rural<span>Mart</span></div>
+      <div class="visual-copy">
+        <small>Fresh • Safe • Local</small>
+        <h1>Welcome<br>Back</h1>
+        <p>Login to continue shopping fresh rural products from trusted farmers and local sellers.</p>
+      </div>
+      <div class="visual-card">
+        <div><b>100%</b><span>Natural</span></div>
+        <div><b>7 Days</b><span>Easy Return</span></div>
+        <div><b>Secure</b><span>Payment</span></div>
+      </div>
+    </aside>
+
+    <main class="auth-card">
+      <div class="form-head">
+        <span class="form-kicker">Customer Access</span>
+        <h2>Login to Your Account</h2>
+        <p>Enter your email/phone and password to continue.</p>
+      </div>
+
+      <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <form #loginForm="ngForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Email or Phone Number</label>
+          <div class="input-wrap">
+            <span class="input-icon">@</span>
+            <input type="text" name="email" [(ngModel)]="user.email"
+              required #emailRef="ngModel"
+              placeholder="Enter your email or phone"
+              [class.input-error]="emailRef.invalid && emailRef.touched">
+          </div>
+          <small class="err-text" *ngIf="emailRef.invalid && emailRef.touched">Email or phone is required</small>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">⌕</span>
+            <input [type]="showPass ? 'text' : 'password'" name="password"
+              [(ngModel)]="user.password" required #passRef="ngModel"
+              placeholder="Enter your password"
+              [class.input-error]="passRef.invalid && passRef.touched">
+            <button type="button" class="eye-btn" (click)="showPass = !showPass">{{ showPass ? 'Hide' : 'Show' }}</button>
+          </div>
+          <small class="err-text" *ngIf="passRef.invalid && passRef.touched">Password is required</small>
+        </div>
+
+        <div class="form-extra">
+          <label class="remember"><input type="checkbox"> Remember me</label>
+          <a (click)="forgotPassword()">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="loginForm.invalid || isLoading">
+          {{ isLoading ? 'Signing in...' : 'Login  →' }}
+        </button>
+      </form>
+
+      <div class="divider"><span>or continue with</span></div>
+
+      <div class="social-row">
+        <button type="button"><b>G</b> Google</button>
+        <button type="button"><b>f</b> Facebook</button>
+      </div>
+
+      <div class="auth-footer">
+        Don’t have an account?
+        <a routerLink="/register">Create Account</a>
+      </div>
+    </main>
+  </section>
+</div>

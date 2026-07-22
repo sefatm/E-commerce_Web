@@ -1,0 +1,68 @@
+<app-site-header *ngIf="showSiteHeader"></app-site-header>
+
+<main class="profile-page">
+  <section class="profile-shell">
+    <div class="profile-card">
+      <div class="photo-panel">
+        <div class="avatar-wrap">
+          <img *ngIf="previewUrl" [src]="previewUrl" alt="Profile photo">
+          <span *ngIf="!previewUrl">{{ initials() }}</span>
+        </div>
+
+        <label class="photo-btn">
+          Change Photo
+          <input type="file" accept="image/*" (change)="onPhotoSelect($event)">
+        </label>
+
+        <p>{{ user?.role || 'customer' }} account</p>
+        <small>{{ user?.userCode }}</small>
+      </div>
+
+      <div class="form-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Account</p>
+            <h1>Profile Settings</h1>
+          </div>
+        </div>
+
+        <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+        <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+        <div class="form-grid">
+          <label>
+            <span>Name</span>
+            <input type="text" [(ngModel)]="profile.name">
+          </label>
+
+          <label>
+            <span>Email</span>
+            <input type="email" [(ngModel)]="profile.email">
+          </label>
+
+          <label>
+            <span>Phone</span>
+            <input type="text" [(ngModel)]="profile.phone">
+          </label>
+
+          <label>
+            <span>New Password</span>
+            <input type="password" [(ngModel)]="profile.password" placeholder="Leave blank to keep current">
+          </label>
+
+          <label class="full">
+            <span>Address</span>
+            <textarea rows="4" [(ngModel)]="profile.address"></textarea>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="ghost" [routerLink]="cancelRoute">Cancel</button>
+          <button type="button" class="save" (click)="saveProfile()" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save Profile' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

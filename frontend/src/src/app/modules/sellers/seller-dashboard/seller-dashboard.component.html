@@ -1,0 +1,193 @@
+<div class="seller-dashboard">
+  <div class="page-header">
+    <div>
+      <h1>{{ pageTitle() }}</h1>
+      <p>{{ pageSubtitle() }}</p>
+    </div>
+
+    <select class="seller-select" *ngIf="isAdminView" [(ngModel)]="selectedSellerId" (change)="loadDashboard()">
+      <option [ngValue]="null">Select seller</option>
+      <option *ngFor="let seller of sellers" [ngValue]="seller.id">
+        {{ seller.shopName || seller.name }}
+      </option>
+    </select>
+  </div>
+
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="empty-state" *ngIf="!isLoading && isAdminView && sellers.length === 0">No approved sellers yet.</div>
+  <div class="loading" *ngIf="isLoading">Loading seller workspace...</div>
+
+  <ng-container *ngIf="!isLoading && selectedSellerId">
+    <section class="seller-card">
+      <div>
+        <span class="badge">Verified Artisan</span>
+        <h2>{{ sellerName() }}</h2>
+        <p>{{ selectedSeller?.district || 'Area not set' }}</p>
+      </div>
+      <div class="seller-contact">
+        <span>{{ selectedSeller?.email || 'Email not set' }}</span>
+        <span>{{ selectedSeller?.phone || 'Phone not set' }}</span>
+      </div>
+      <div class="seller-meta">
+        <span>Commission</span>
+        <strong>{{ selectedSeller?.commissionRate || 10 }}%</strong>
+      </div>
+    </section>
+
+    <section class="stat-grid" *ngIf="showOverview()">
+      <div class="stat-card">
+        <span>Total Orders</span>
+        <strong>{{ stats?.totalOrders || 0 }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Gross Sales</span>
+        <strong>&#x09F3;{{ (commissionSummary?.grossAmount || 0) | number:'1.2-2' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Seller Earnings</span>
+        <strong>&#x09F3;{{ (commissionSummary?.sellerAmount || 0) | number:'1.2-2' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Platform Commission</span>
+        <strong>&#x09F3;{{ (commissionSummary?.platformCommission || 0) | number:'1.2-2' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Payable</span>
+        <strong>&#x09F3;{{ (commissionSummary?.payableAmount || 0) | number:'1.2-2' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Pending Payout</span>
+        <strong>&#x09F3;{{ payoutTotal('PENDING') | number:'1.2-2' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Paid Out</span>
+        <strong>&#x09F3;{{ payoutTotal('PAID') | number:'1.2-2' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Available Withdraw</span>
+        <strong>&#x09F3;{{ (availableWithdrawBalance || 0) | number:'1.2-2' }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Approved Products</span>
+        <strong>{{ countProducts('APPROVED') }}</strong>
+      </div>
+      <div class="stat-card">
+        <span>Pending Products</span>
+        <strong>{{ countProducts('PENDING') }}</strong>
+      </div>
+    </section>
+
+    <section class="dashboard-section" *ngIf="showWithdrawals()">
+      <div class="section-head">
+        <h2>Withdraw Requests</h2>
+        <span class="section-note">Available payout request for seller earnings.</span>
+      </div>
+
+      <form class="withdraw-form" *ngIf="!isAdminView" (ngSubmit)="submitWithdraw()">
+        <input type="number" name="amount" placeholder="Amount" [(ngModel)]="withdrawForm.amount" min="1" required>
+        <select name="paymentMethod" [(ngModel)]="withdrawForm.paymentMethod">
+          <option value="bkash">bKash</option>
+          <option value="nagad">Nagad</option>
+          <option value="bank_transfer">Bank Transfer</option>
+          <option value="cash">Cash</option>
+        </select>
+        <input type="text" name="accountName" placeholder="Account name" [(ngModel)]="withdrawForm.accountName">
+        <input type="text" name="accountNumber" placeholder="Account number" [(ngModel)]="withdrawForm.accountNumber">
+        <button type="submit" [disabled]="availableWithdrawBalance <= 0">Request Withdraw</button>
+        <small class="withdraw-note">Available balance: &#x09F3;{{ (availableWithdrawBalance || 0) | number:'1.2-2' }}</small>
+      </form>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Account</th>
+              <th>Status</th>
+              <th>Requested</th>
+              <th>Transaction</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let w of withdrawals">
+              <td>&#x09F3;{{ (w.amount || 0) | number:'1.2-2' }}</td>
+              <td>{{ w.paymentMethod }}</td>
+              <td>{{ w.accountName || '-' }}<br><small>{{ w.accountNumber || '' }}</small></td>
+              <td><span class="pill" [ngClass]="statusClass(w.status)">{{ w.status }}</span></td>
+              <td>{{ w.requestDate | date:'dd MMM yy' }}</td>
+              <td>{{ w.transactionRef || '-' }}</td>
+            </tr>
+            <tr *ngIf="withdrawals.length === 0">
+              <td colspan="6">No withdraw requests yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dashboard-section" *ngIf="showFinance()">
+      <div class="section-head">
+        <h2>Commission Records</h2>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Gross</th>
+              <th>Commission</th>
+              <th>Seller Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of commissions">
+              <td>{{ c.order?.orderCode || c.order?.id }}</td>
+              <td>&#x09F3;{{ (c.grossAmount || 0) | number:'1.2-2' }}</td>
+              <td>&#x09F3;{{ (c.commissionAmount || 0) | number:'1.2-2' }}</td>
+              <td>&#x09F3;{{ (c.sellerAmount || 0) | number:'1.2-2' }}</td>
+              <td><span class="pill" [ngClass]="statusClass(c.status)">{{ c.status }}</span></td>
+            </tr>
+            <tr *ngIf="commissions.length === 0">
+              <td colspan="5">No commission records for this seller yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dashboard-section" *ngIf="showOverview()">
+      <div class="section-head">
+        <h2>Seller Products</h2>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Approval</th>
+              <th>Pre-order</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of filteredProducts">
+              <td>{{ product.name }}</td>
+              <td>&#x09F3;{{ product.price | number:'1.2-2' }}</td>
+              <td>{{ product.stock || 0 }}</td>
+              <td><span class="pill" [ngClass]="statusClass(product.approvalStatus)">{{ product.approvalStatus || 'PENDING' }}</span></td>
+              <td>{{ product.preOrderAvailable ? 'Yes' : 'No' }}</td>
+            </tr>
+            <tr *ngIf="filteredProducts.length === 0">
+              <td colspan="5">No products for this seller yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

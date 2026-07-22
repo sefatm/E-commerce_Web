@@ -1,0 +1,115 @@
+<div class="payment-page">
+
+  <div class="page-header">
+    <div>
+      <h2>💳 Payment Management</h2>
+      <p>Track and manage all order payments</p>
+    </div>
+  </div>
+
+  <div class="alert-success" *ngIf="successMsg">✅ {{ successMsg }}</div>
+
+  <!-- Summary Cards -->
+  <div class="summary-row">
+    <div class="summary-card green">
+      <div class="sum-icon">✅</div>
+      <div>
+        <div class="sum-label">Total Collected</div>
+        <div class="sum-val">৳{{ getTotalRevenue() | number:'1.0-0' }}</div>
+      </div>
+    </div>
+    <div class="summary-card blue">
+      <div class="sum-icon">📦</div>
+      <div>
+        <div class="sum-label">Paid Orders</div>
+        <div class="sum-val">{{ getPaidCount() }}</div>
+      </div>
+    </div>
+    <div class="summary-card orange">
+      <div class="sum-icon">⏳</div>
+      <div>
+        <div class="sum-label">Unpaid Orders</div>
+        <div class="sum-val">{{ getUnpaidCount() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Payment Status</label>
+      <div class="tab-group">
+        <button *ngFor="let s of paymentStatuses"
+          [class.active]="selectedPaymentStatus === s"
+          (click)="selectedPaymentStatus = s; applyFilter()">{{ s }}</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <label>Payment Method</label>
+      <div class="tab-group">
+        <button *ngFor="let m of paymentMethods"
+          [class.active]="selectedMethod === m"
+          (click)="selectedMethod = m; applyFilter()">{{ m }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Order Code</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Method</th>
+            <th>Order Total</th>
+            <th>Order Status</th>
+            <th>Payment Status</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of filteredOrders; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td><span class="order-code">{{ o.orderCode }}</span></td>
+            <td><strong>{{ o.customerName }}</strong></td>
+            <td>{{ o.customerPhone }}</td>
+            <td>
+              <span class="method-badge method-{{ o.paymentMethod?.toLowerCase() }}">
+                {{ o.paymentMethod }}
+              </span>
+            </td>
+            <td><strong>৳{{ o.totalAmount | number:'1.0-0' }}</strong></td>
+            <td>
+              <span class="status-badge badge-{{ o.status?.toLowerCase() }}">{{ o.status }}</span>
+            </td>
+            <td>
+              <span class="pay-badge" [class.paid]="o.paymentStatus === 'PAID'"
+                [class.unpaid]="o.paymentStatus === 'UNPAID'"
+                [class.refunded]="o.paymentStatus === 'REFUNDED'">
+                {{ o.paymentStatus }}
+              </span>
+            </td>
+            <td>{{ o.orderDate | date:'dd MMM yy' }}</td>
+            <td>
+              <button class="btn-mark-paid"
+                *ngIf="o.paymentStatus === 'UNPAID'"
+                (click)="markAsPaid(o)">
+                Mark Paid ✅
+              </button>
+              <span class="paid-text" *ngIf="o.paymentStatus === 'PAID'">Collected ✓</span>
+            </td>
+          </tr>
+          <tr *ngIf="filteredOrders.length === 0">
+            <td colspan="10" class="empty">No payment records found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

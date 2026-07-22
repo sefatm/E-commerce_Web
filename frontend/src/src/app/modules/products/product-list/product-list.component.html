@@ -1,0 +1,248 @@
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Product List</h1>
+      <p class="page-sub">{{ products.length }} products found</p>
+    </div>
+    <a *ngIf="canAddProduct" [routerLink]="addProductRoute" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      Add Product
+    </a>
+  </div>
+
+  <!-- ✅ FIX #10: success/error messages যোগ -->
+  <div class="alert alert-success" *ngIf="successMsg">✅ {{ successMsg }}</div>
+  <div class="alert alert-error"   *ngIf="errorMsg">❌ {{ errorMsg }}</div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="9.5" y1="9.5" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <input type="text" class="search-input" [(ngModel)]="searchTerm"
+        (input)="applyFilters()" placeholder="Search products..."/>
+    </div>
+
+    <app-category-nav
+      [activeId]="categoryFilter"
+      (categorySelected)="onCategorySelect($event)">
+    </app-category-nav>
+
+    <select class="filter-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+      <option value="all">All Status</option>
+      <option value="active">Active</option>
+      <option value="draft">Draft</option>
+      <option value="inactive">Inactive</option>
+    </select>
+
+    <select class="filter-select" [(ngModel)]="approvalFilter" (change)="applyFilters()">
+      <option value="all">All Approvals</option>
+      <option value="PENDING">Pending</option>
+      <option value="APPROVED">Approved</option>
+      <option value="REJECTED">Rejected</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading products...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading && filteredProducts.length === 0">
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+      <rect x="6" y="6" width="16" height="16" rx="3" stroke="#cbd5e1" stroke-width="2"/>
+      <rect x="26" y="6" width="16" height="16" rx="3" stroke="#cbd5e1" stroke-width="2"/>
+      <rect x="6" y="26" width="16" height="16" rx="3" stroke="#cbd5e1" stroke-width="2"/>
+      <rect x="26" y="26" width="16" height="16" rx="3" stroke="#cbd5e1" stroke-width="2"/>
+    </svg>
+    <p class="empty-text">No products found</p>
+    <a *ngIf="canAddProduct" [routerLink]="addProductRoute" class="btn-primary">Add First Product</a>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card" *ngIf="!isLoading && filteredProducts.length > 0">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" (change)="toggleSelectAll($event)"/></th>
+          <th>Product</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Approval</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredProducts">
+          <td><input type="checkbox"/></td>
+          <td>
+            <div class="product-cell">
+              <div class="product-img-wrap">
+                <img
+                  [src]="p.image ? 'http://localhost:8080/uploads/' + p.image : 'assets/placeholder.png'"
+                  class="product-thumb" alt="{{ p.name }}"/>
+              </div>
+              <div class="product-info">
+                <div class="product-name">{{ p.name }}</div>
+                <div class="product-sku" *ngIf="p.sku">SKU: {{ p.sku }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <!-- ✅ FIX #11: p.categoryName → p.category?.name
+                 Backend থেকে category একটা nested object হিসেবে আসে: { id, name }
+                 তাই p.categoryName কাজ করত না, সবসময় 'Uncategorized' দেখাত -->
+            <span class="category-tag">{{ getCategoryName(p) }}</span>
+          </td>
+          <td>
+            <div class="price-cell">
+              <span class="price-main">৳{{ p.price }}</span>
+              <span class="price-sale" *ngIf="p.salePrice">৳{{ p.salePrice }}</span>
+            </div>
+          </td>
+          <td>
+            <span class="stock-badge" [ngClass]="getStockClass(p.stock)">
+              {{ p.stock ?? 0 }}
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="'s-' + (p.status || 'active')">
+              {{ p.status || 'Active' }}
+            </span>
+          </td>
+          <td>
+            <span class="approval-badge" [ngClass]="'a-' + (p.approvalStatus || 'PENDING')">
+              {{ p.approvalStatus || 'PENDING' }}
+            </span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="icon-btn" title="View" (click)="viewProduct(p)">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <circle cx="6.5" cy="6.5" r="2.5" stroke="currentColor" stroke-width="1.2"/>
+                  <path d="M1 6.5C2.5 3.5 4.5 2 6.5 2s4 1.5 5.5 4.5C10.5 10 8.5 11 6.5 11S2.5 10 1 6.5z" stroke="currentColor" stroke-width="1.2"/>
+                </svg>
+              </button>
+              <button class="icon-btn edit" title="Edit" (click)="editProduct(p.id)">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M9 2l2 2-7 7H2v-2L9 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="icon-btn approve" title="Approve" *ngIf="!isSellerView && p.approvalStatus !== 'APPROVED'" (click)="approveProduct(p.id)">
+                OK
+              </button>
+              <button class="icon-btn reject" title="Reject" *ngIf="!isSellerView && p.approvalStatus !== 'REJECTED'" (click)="rejectProduct(p.id)">
+                NO
+              </button>
+              <button class="icon-btn danger" title="Delete" (click)="deleteProduct(p.id)">
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M2 3.5h9M5 3.5V2h3v1.5M4.5 3.5v6a.5.5 0 00.5.5h3a.5.5 0 00.5-.5v-6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <span class="page-info">Showing {{ filteredProducts.length }} of {{ products.length }} products</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== View Product Modal ===== -->
+<div class="modal-backdrop" *ngIf="viewModalProduct" (click)="closeViewModal()">
+  <div class="view-modal" (click)="$event.stopPropagation()">
+    <div class="vm-header">
+      <h3 class="vm-title">Product Details</h3>
+      <button class="vm-close" (click)="closeViewModal()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="vm-body">
+      <div class="vm-image-wrap" *ngIf="viewModalProduct.image">
+        <img [src]="'http://localhost:8080/uploads/' + viewModalProduct.image" [alt]="viewModalProduct.name" class="vm-image" onerror="this.style.display='none'"/>
+      </div>
+      <div class="vm-rows">
+        <div class="vm-row"><span class="vm-key">Name</span><span class="vm-val">{{ viewModalProduct.name }}</span></div>
+        <div class="vm-row"><span class="vm-key">SKU</span><span class="vm-val">{{ viewModalProduct.sku || '—' }}</span></div>
+        <div class="vm-row"><span class="vm-key">Price</span><span class="vm-val">${{ viewModalProduct.price }}</span></div>
+        <div class="vm-row" *ngIf="viewModalProduct.isOnSale && viewModalProduct.salePrice">
+          <span class="vm-key">Sale Price</span>
+          <span class="vm-val sale">${{ viewModalProduct.salePrice }}</span>
+        </div>
+        <div class="vm-row"><span class="vm-key">Stock</span><span class="vm-val">{{ viewModalProduct.stock ?? '—' }}</span></div>
+        <div class="vm-row"><span class="vm-key">Category</span><span class="vm-val">{{ viewModalProduct.category?.name || 'Uncategorized' }}</span></div>
+        <div class="vm-row"><span class="vm-key">Brand</span><span class="vm-val">{{ viewModalProduct.brand?.name || '—' }}</span></div>
+        <div class="vm-row"><span class="vm-key">Status</span><span class="vm-val">{{ viewModalProduct.status || 'Active' }}</span></div>
+        <div class="vm-row"><span class="vm-key">Approval</span><span class="vm-val">{{ viewModalProduct.approvalStatus || 'PENDING' }}</span></div>
+        <div class="vm-row"><span class="vm-key">Origin</span><span class="vm-val">{{ viewModalProduct.originArea || '—' }}</span></div>
+        <div class="vm-row"><span class="vm-key">Seller</span><span class="vm-val">{{ viewModalProduct.seller?.shopName || viewModalProduct.seller?.name || '—' }}</span></div>
+        <div class="vm-row" *ngIf="viewModalProduct.preOrderAvailable">
+          <span class="vm-key">Pre-order</span>
+          <span class="vm-val">{{ viewModalProduct.estimatedProductionDays || 0 }} days</span>
+        </div>
+        <div class="vm-row" *ngIf="viewModalProduct.description">
+          <span class="vm-key">Description</span>
+          <span class="vm-val desc">{{ viewModalProduct.description }}</span>
+        </div>
+        <div class="vm-row" *ngIf="viewModalProduct.artisanStory">
+          <span class="vm-key">Story</span>
+          <span class="vm-val desc">{{ viewModalProduct.artisanStory }}</span>
+        </div>
+        <div class="vm-row" *ngIf="viewModalProduct.craftProcess">
+          <span class="vm-key">Process</span>
+          <span class="vm-val desc">{{ viewModalProduct.craftProcess }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="vm-footer">
+      <button class="vm-edit-btn" (click)="editProduct(viewModalProduct.id); closeViewModal()">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2l2 2-7 7H2v-2L9 2z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        Edit Product
+      </button>
+      <button class="vm-cancel-btn" (click)="closeViewModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; font-weight: 500; }
+.alert-success { background: #e8f5e9; color: #2e7d32; border-left: 4px solid #4caf50; }
+.alert-error   { background: #fdecea; color: #c62828; border-left: 4px solid #f44336; }
+
+/* View Modal */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.45); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+.view-modal { background: #fff; border-radius: 16px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.18); }
+.vm-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 16px; border-bottom: 1px solid #f1f5f9; }
+.vm-title { font-size: 16px; font-weight: 600; color: #0f172a; margin: 0; }
+.vm-close { border: none; background: #f1f5f9; border-radius: 8px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; }
+.vm-close:hover { background: #e2e8f0; }
+.vm-body { padding: 20px 24px; }
+.vm-image-wrap { margin-bottom: 16px; border-radius: 10px; overflow: hidden; background: #f8fafc; height: 180px; display: flex; align-items: center; justify-content: center; }
+.vm-image { max-height: 180px; max-width: 100%; object-fit: contain; }
+.vm-rows { display: flex; flex-direction: column; gap: 10px; }
+.vm-row { display: flex; gap: 12px; align-items: flex-start; font-size: 13.5px; }
+.vm-key { min-width: 100px; color: #94a3b8; font-weight: 500; }
+.vm-val { color: #1e293b; font-weight: 500; }
+.vm-val.sale { color: #10b981; font-weight: 600; }
+.vm-val.desc { color: #475569; font-weight: 400; line-height: 1.5; }
+.vm-footer { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f1f5f9; }
+.vm-edit-btn { display: flex; align-items: center; gap: 6px; padding: 9px 18px; background: #10b981; color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.vm-edit-btn:hover { background: #059669; }
+.vm-cancel-btn { padding: 9px 18px; background: #f1f5f9; color: #475569; border: none; border-radius: 9px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.vm-cancel-btn:hover { background: #e2e8f0; }
+</style>

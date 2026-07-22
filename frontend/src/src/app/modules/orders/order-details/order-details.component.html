@@ -1,0 +1,125 @@
+<div class="details-page">
+
+  <div class="loading-state" *ngIf="isLoading">Loading order details...</div>
+  <div class="alert alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <ng-container *ngIf="order && !isLoading">
+
+    <div class="page-header">
+      <div>
+        <h2>Order Details</h2>
+        <span class="order-code-tag">{{ order.orderCode }}</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="goBack()">Back</button>
+        <button class="btn btn-secondary" (click)="goToTracking()">Track</button>
+        <button class="btn btn-primary" (click)="goToInvoice()">Invoice</button>
+      </div>
+    </div>
+
+    <div class="alert alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+
+    <div class="progress-card" *ngIf="order.status !== 'CANCELLED'">
+      <div class="progress-steps">
+        <div class="step" *ngFor="let step of statusSteps; let i = index"
+          [class.done]="i < getCurrentStepIndex()"
+          [class.active]="i === getCurrentStepIndex()">
+          <div class="step-circle">
+            <span *ngIf="i < getCurrentStepIndex()">OK</span>
+            <span *ngIf="i >= getCurrentStepIndex()">{{ i + 1 }}</span>
+          </div>
+          <div class="step-label">{{ step }}</div>
+          <div class="step-line" *ngIf="i < statusSteps.length - 1"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status-control" *ngIf="order.status !== 'DELIVERED' && order.status !== 'CANCELLED'">
+      <span>Update Status:</span>
+      <button class="btn btn-sm btn-processing" *ngIf="order.status === 'PENDING'"
+        (click)="updateStatus('ACCEPTED')">Mark Accepted</button>
+      <button class="btn btn-sm btn-processing" *ngIf="order.status === 'PENDING' || order.status === 'ACCEPTED'"
+        (click)="updateStatus('PROCESSING')">Mark Processing</button>
+      <button class="btn btn-sm btn-shipped" *ngIf="order.status === 'PROCESSING'"
+        (click)="updateStatus('SHIPPED')">Mark Shipped</button>
+      <button class="btn btn-sm btn-delivered" *ngIf="order.status === 'SHIPPED'"
+        (click)="updateStatus('DELIVERED')">Mark Delivered</button>
+      <button class="btn btn-sm btn-cancel"
+        (click)="updateStatus('CANCELLED')">Cancel Order</button>
+    </div>
+
+    <div class="info-grid">
+
+      <div class="info-card">
+        <h3>Customer Info</h3>
+        <div class="info-row"><span>Name</span><span>{{ order.customerName }}</span></div>
+        <div class="info-row"><span>Phone</span><span>{{ order.customerPhone }}</span></div>
+        <div class="info-row" *ngIf="order.customerEmail"><span>Email</span><span>{{ order.customerEmail }}</span></div>
+        <div class="info-row"><span>Address</span><span>{{ order.shippingAddress }}</span></div>
+        <div class="info-row" *ngIf="order.orderNote"><span>Note</span><span class="note">{{ order.orderNote }}</span></div>
+      </div>
+
+      <div class="info-card">
+        <h3>Order & Payment</h3>
+        <div class="info-row"><span>Order Date</span><span>{{ order.orderDate | date:'dd MMM yyyy' }}</span></div>
+        <div class="info-row" *ngIf="order.deliveredDate"><span>Delivered</span><span>{{ order.deliveredDate | date:'dd MMM yyyy' }}</span></div>
+        <div class="info-row"><span>Payment Method</span><span>{{ order.paymentMethod }}</span></div>
+        <div class="info-row">
+          <span>Payment Status</span>
+          <span
+            class="pay-badge"
+            [class.paid]="order.paymentStatus === 'PAID' || order.paymentStatus === 'REFUNDED'"
+            [class.unpaid]="order.paymentStatus !== 'PAID' && order.paymentStatus !== 'REFUNDED'">
+            {{ order.paymentStatus }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span>Order Status</span>
+          <span class="status-badge" [ngClass]="getStatusClass(order.status!)">{{ order.status }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="items-card">
+      <h3>Order Items</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Unit Price</th>
+            <th>Qty</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of order.items">
+            <td>
+              <div class="product-cell">
+                <img *ngIf="item.productImage" [src]="'http://localhost:8080/uploads/' + item.productImage" class="product-thumb">
+                <div class="no-img" *ngIf="!item.productImage">No Image</div>
+                <span>{{ item.productName }}</span>
+              </div>
+            </td>
+            <td>&#x09F3;{{ item.unitPrice | number:'1.2-2' }}</td>
+            <td>{{ item.quantity }}</td>
+            <td><strong>&#x09F3;{{ item.totalPrice | number:'1.2-2' }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="totals">
+        <div class="total-row"><span>Subtotal</span><span>&#x09F3;{{ order.subtotal | number:'1.2-2' }}</span></div>
+        <div class="total-row discount" *ngIf="order.discountAmount && order.discountAmount > 0">
+          <span>Discount <small *ngIf="order.couponCode">({{ order.couponCode }})</small></span>
+          <span>- &#x09F3;{{ order.discountAmount | number:'1.2-2' }}</span>
+        </div>
+        <div class="total-row total-final">
+          <span>Total</span>
+          <span>&#x09F3;{{ order.totalAmount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

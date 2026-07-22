@@ -1,0 +1,116 @@
+<div class="loading-state" *ngIf="isLoading">
+  <p>Loading invoice...</p>
+</div>
+
+<div class="invoice-page" *ngIf="!isLoading && order">
+
+  <div class="screen-controls no-print">
+    <div class="back-link" (click)="goBack()">Back to Order</div>
+    <button class="print-btn" (click)="printInvoice()">Print Invoice</button>
+  </div>
+
+  <div class="invoice-doc">
+
+    <div class="inv-header">
+      <div>
+        <div class="brand-logo">Rural Mart</div>
+        <div class="brand-sub">Rural Artisan Marketplace</div>
+      </div>
+      <div class="inv-meta">
+        <h2>INVOICE</h2>
+        <div class="inv-code">{{ order.orderCode }}</div>
+        <div class="inv-date">Date: {{ order.orderDate | date:'dd MMM yyyy' }}</div>
+      </div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="inv-info-row">
+      <div>
+        <p class="section-label">Billed To</p>
+        <p class="inv-customer-name">{{ order.customerName }}</p>
+        <p>{{ order.customerPhone }}</p>
+        <p *ngIf="order.customerEmail">{{ order.customerEmail }}</p>
+        <p>{{ order.shippingAddress }}</p>
+      </div>
+      <div>
+        <p class="section-label">Order Info</p>
+        <div class="inv-status-box">
+          <div class="inv-status-row">
+            <span>Payment Method</span>
+            <strong>{{ order.paymentMethod }}</strong>
+          </div>
+          <div class="inv-status-row">
+            <span>Payment Status</span>
+            <span class="pay-badge"
+              [class.paid]="order.paymentStatus === 'PAID' || order.paymentStatus === 'REFUNDED'"
+              [class.unpaid]="order.paymentStatus !== 'PAID' && order.paymentStatus !== 'REFUNDED'">
+              {{ order.paymentStatus }}
+            </span>
+          </div>
+          <div class="inv-status-row">
+            <span>Order Status</span>
+            <strong>{{ order.status }}</strong>
+          </div>
+          <div class="inv-status-row" *ngIf="order.deliveredDate">
+            <span>Delivered On</span>
+            <span>{{ order.deliveredDate | date:'dd MMM yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <table class="inv-table">
+      <thead>
+        <tr>
+          <th class="col-no">#</th>
+          <th>Product</th>
+          <th class="col-num">Unit Price</th>
+          <th class="col-num">Qty</th>
+          <th class="col-num">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of order.items; let i = index">
+          <td class="col-no">{{ i + 1 }}</td>
+          <td>{{ item.productName }}</td>
+          <td class="col-num">&#x09F3;{{ item.unitPrice | number:'1.2-2' }}</td>
+          <td class="col-num">{{ item.quantity }}</td>
+          <td class="col-num"><strong>&#x09F3;{{ item.totalPrice | number:'1.2-2' }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="inv-totals">
+      <div class="total-row">
+        <span>Subtotal</span>
+        <span>&#x09F3;{{ order.subtotal | number:'1.2-2' }}</span>
+      </div>
+      <div class="total-row">
+        <span>Shipping</span>
+        <span class="free">Free</span>
+      </div>
+      <div class="total-row discount" *ngIf="order.discountAmount && order.discountAmount > 0">
+        <span>
+          Discount
+          <small *ngIf="order.couponCode">({{ order.couponCode }})</small>
+        </span>
+        <span>- &#x09F3;{{ order.discountAmount | number:'1.2-2' }}</span>
+      </div>
+      <div class="total-row total-final">
+        <span>Total</span>
+        <span>&#x09F3;{{ order.totalAmount | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="inv-note" *ngIf="order.orderNote">
+      <strong>Note:</strong> {{ order.orderNote }}
+    </div>
+
+    <div class="inv-footer">
+      <p>Thank you for shopping with Rural Mart.</p>
+      <p class="footer-small">This is a computer-generated invoice. No signature required.</p>
+    </div>
+
+  </div>
+</div>

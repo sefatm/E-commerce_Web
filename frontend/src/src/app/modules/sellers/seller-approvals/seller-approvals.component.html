@@ -1,0 +1,87 @@
+<div class="review-page">
+  <div class="page-header">
+    <div>
+      <h1>Seller Approvals</h1>
+      <p>{{ sellers.length }} pending applications</p>
+    </div>
+    <button class="refresh-btn" (click)="loadPending()">Refresh</button>
+  </div>
+
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="loading" *ngIf="isLoading">Loading seller applications...</div>
+
+  <div class="empty-state" *ngIf="!isLoading && sellers.length === 0">
+    No pending seller applications.
+  </div>
+
+  <div class="review-grid" *ngIf="!isLoading && sellers.length > 0">
+    <article class="review-card" *ngFor="let seller of sellers">
+      <div class="card-top">
+        <div>
+          <h2>{{ seller.shopName || seller.name }}</h2>
+          <p>{{ seller.name }} · {{ seller.district || 'Area not set' }}</p>
+        </div>
+        <span class="status">{{ seller.status }}</span>
+      </div>
+
+      <div class="meta-grid">
+        <span>Email</span><strong>{{ seller.email || 'N/A' }}</strong>
+        <span>Phone</span><strong>{{ seller.phone || 'N/A' }}</strong>
+        <span>NID</span><strong>{{ seller.nidNo || 'N/A' }}</strong>
+        <span>Commission</span><strong>{{ seller.commissionRate || 10 }}%</strong>
+      </div>
+
+      <div class="story-block">
+        <h3>Artisan Story</h3>
+        <p>{{ seller.artisanStory || 'No story provided.' }}</p>
+      </div>
+
+      <div class="story-block">
+        <h3>Craft Process</h3>
+        <p>{{ seller.craftProcess || 'No process provided.' }}</p>
+      </div>
+
+      <div class="actions">
+        <button class="reject-btn" (click)="openReject(seller)" [disabled]="isSubmitting">Reject</button>
+        <button class="approve-btn" (click)="approve(seller.id)" [disabled]="isSubmitting">Approve</button>
+      </div>
+    </article>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="rejectTarget" (click)="closeReject()">
+    <div class="reject-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div>
+          <span>Seller verification decision</span>
+          <h2>Reject {{ rejectTarget.shopName || rejectTarget.name }}</h2>
+        </div>
+        <button type="button" class="close-btn" (click)="closeReject()">x</button>
+      </div>
+
+      <div class="reject-summary">
+        <p><strong>Owner:</strong> {{ rejectTarget.name }}</p>
+        <p><strong>Phone:</strong> {{ rejectTarget.phone || 'N/A' }}</p>
+        <p><strong>NID:</strong> {{ rejectTarget.nidNo || 'N/A' }}</p>
+      </div>
+
+      <label class="reason-field">
+        <span>Reject reason</span>
+        <textarea
+          rows="4"
+          [(ngModel)]="rejectReason"
+          placeholder="Example: NID or shop information could not be verified.">
+        </textarea>
+      </label>
+      <small class="field-error" *ngIf="rejectError">{{ rejectError }}</small>
+
+      <div class="modal-actions">
+        <button type="button" class="refresh-btn" (click)="closeReject()">Cancel</button>
+        <button type="button" class="reject-btn" (click)="reject()" [disabled]="isSubmitting">
+          {{ isSubmitting ? 'Rejecting...' : 'Confirm Reject' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

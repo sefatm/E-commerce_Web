@@ -1,0 +1,157 @@
+<div class="offer-page">
+
+  <div class="page-header">
+    <h2><i>🏷️</i> Offer Management</h2>
+    <p>Create banner offers, flash sales, and seasonal promotions</p>
+  </div>
+
+  <div class="alert alert-success" *ngIf="successMsg">✅ {{ successMsg }}</div>
+  <div class="alert alert-error"   *ngIf="errorMsg">❌ {{ errorMsg }}</div>
+
+  <!-- ========== OFFER FORM ========== -->
+  <div class="card form-card">
+    <h3>{{ isEditing ? '✏️ Edit Offer' : '➕ Create New Offer' }}</h3>
+
+    <form [formGroup]="offerForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+
+        <div class="form-group full-width">
+          <label>Offer Title <span class="required">*</span></label>
+          <input type="text" formControlName="title" placeholder="e.g. Eid Special 30% Off" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Offer Type <span class="required">*</span></label>
+          <select formControlName="offerType" class="form-control">
+            <option value="BANNER">Banner Offer</option>
+            <option value="FLASH_SALE">Flash Sale</option>
+            <option value="SEASONAL">Seasonal Offer</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Discount Percentage (%) <span class="required">*</span></label>
+          <input type="number" formControlName="discountPercentage" placeholder="e.g. 30"
+            class="form-control" min="1" max="100">
+        </div>
+
+        <div class="form-group">
+          <label>Apply to Product <small>(optional)</small></label>
+          <select formControlName="productId" class="form-control">
+            <option value="">— All Products —</option>
+            <option *ngFor="let p of products" [value]="p.id">{{ p.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Apply to Category <small>(optional)</small></label>
+          <select formControlName="categoryId" class="form-control">
+            <option value="">— All Categories —</option>
+            <option *ngFor="let c of categories" [value]="c.id">{{ c.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" formControlName="startDate" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" formControlName="endDate" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Status</label>
+          <select formControlName="status" class="form-control">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </div>
+
+        <div class="form-group" *ngIf="!isEditing">
+          <label>Banner Image</label>
+          <input type="file" accept="image/*" (change)="onFileSelect($event)" class="form-control file-input">
+          <div class="preview-box" *ngIf="previewUrl">
+            <img [src]="previewUrl" alt="Preview">
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Description</label>
+          <textarea formControlName="description" rows="2"
+            placeholder="Short description shown to customers" class="form-control"></textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="offerForm.invalid">
+          {{ isEditing ? 'Update Offer' : 'Create Offer' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditing">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ========== OFFER LIST ========== -->
+  <div class="card">
+    <h3>📋 All Offers ({{ offers.length }})</h3>
+
+    <div class="offer-grid" *ngIf="offers.length > 0; else noOffers">
+      <div class="offer-card" *ngFor="let o of offers" [class.expired-card]="isExpired(o.endDate)">
+
+        <div class="offer-img">
+          <img *ngIf="o.bannerImage" [src]="getImageUrl(o.bannerImage)" alt="{{ o.title }}">
+          <div class="offer-img-placeholder" *ngIf="!o.bannerImage">🏷️</div>
+        </div>
+
+        <div class="offer-body">
+          <div class="offer-top-row">
+
+            <!-- ✅ FIX #10: string interpolation "offer-type-{{offerType.toLowerCase()}}" এ
+                 FLASH_SALE → "flash_sale" class হত (underscore)।
+                 CSS এ .offer-type-flash_sale লেখা ছিল, কিন্তু কিছু browser/linter এ সমস্যা।
+                 [ngClass] দিয়ে explicit এবং safe class binding করা হয়েছে। -->
+            <span class="offer-type-badge" [ngClass]="{
+              'offer-type-banner':     o.offerType === 'BANNER',
+              'offer-type-flash-sale': o.offerType === 'FLASH_SALE',
+              'offer-type-seasonal':   o.offerType === 'SEASONAL'
+            }">
+              {{ o.offerType === 'FLASH_SALE' ? '⚡ Flash Sale' :
+                 o.offerType === 'SEASONAL'   ? '🌸 Seasonal'  : '🖼️ Banner' }}
+            </span>
+
+            <span class="status-badge"
+              [class.status-active]="o.status === 'ACTIVE'"
+              [class.status-inactive]="o.status !== 'ACTIVE'"
+              (click)="toggleStatus(o)" title="Click to toggle" style="cursor:pointer">
+              {{ o.status }}
+            </span>
+          </div>
+
+          <h4>{{ o.title }}</h4>
+          <p class="offer-desc" *ngIf="o.description">{{ o.description }}</p>
+
+          <div class="offer-meta">
+            <span class="discount-pill">{{ o.discountPercentage }}% OFF</span>
+            <span *ngIf="o.endDate" [class.text-danger]="isExpired(o.endDate)">
+              📅 Until {{ o.endDate | date:'dd MMM yyyy' }}
+              <small *ngIf="isExpired(o.endDate)">(Expired)</small>
+            </span>
+          </div>
+        </div>
+
+        <div class="offer-actions">
+          <button class="btn btn-edit" (click)="onEdit(o)">✏️ Edit</button>
+          <button class="btn btn-delete" (click)="onDelete(o.id!)">🗑️ Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noOffers>
+      <div class="empty-state">No offers yet. Create your first offer above!</div>
+    </ng-template>
+  </div>
+
+</div>

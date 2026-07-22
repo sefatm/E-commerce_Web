@@ -1,0 +1,177 @@
+<div class="coupon-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2><i class="icon">🎟️</i> Coupon Management</h2>
+    <p>Create and manage discount coupons for your customers</p>
+  </div>
+
+  <!-- Success / Error Messages -->
+  <div class="alert alert-success" *ngIf="successMsg">✅ {{ successMsg }}</div>
+  <div class="alert alert-error" *ngIf="errorMsg">❌ {{ errorMsg }}</div>
+
+  <!-- ========== COUPON FORM ========== -->
+  <div class="card form-card">
+    <h3>{{ isEditing ? '✏️ Edit Coupon' : '➕ Create New Coupon' }}</h3>
+
+    <form [formGroup]="couponForm" (ngSubmit)="onSubmit()">
+
+      <div class="form-grid">
+
+        <!-- Coupon Code -->
+        <div class="form-group">
+          <label>Coupon Code <span class="required">*</span></label>
+          <input type="text" formControlName="code" placeholder="e.g. SAVE20"
+            class="form-control uppercase" style="text-transform:uppercase">
+          <span class="error-text"
+            *ngIf="couponForm.get('code')?.invalid && couponForm.get('code')?.touched">
+            Code is required (min 3 characters)
+          </span>
+        </div>
+
+        <!-- Discount Type -->
+        <div class="form-group">
+          <label>Discount Type <span class="required">*</span></label>
+          <select formControlName="discountType" class="form-control">
+            <option value="PERCENTAGE">Percentage (%)</option>
+            <option value="FLAT">Flat Amount (৳)</option>
+          </select>
+        </div>
+
+        <!-- Discount Value -->
+        <div class="form-group">
+          <label>
+            Discount Value <span class="required">*</span>
+            <small>({{ couponForm.get('discountType')?.value === 'PERCENTAGE' ? '%' : '৳' }})</small>
+          </label>
+          <input type="number" formControlName="discountValue" placeholder="e.g. 20" class="form-control">
+        </div>
+
+        <!-- Min Order Amount -->
+        <div class="form-group">
+          <label>Minimum Order Amount (৳)</label>
+          <input type="number" formControlName="minOrderAmount" placeholder="e.g. 500" class="form-control">
+        </div>
+
+        <!-- Max Discount Cap (only for percentage) -->
+        <div class="form-group" *ngIf="couponForm.get('discountType')?.value === 'PERCENTAGE'">
+          <label>Max Discount Cap (৳)</label>
+          <input type="number" formControlName="maxDiscountAmount" placeholder="e.g. 200" class="form-control">
+        </div>
+
+        <!-- Usage Limit -->
+        <div class="form-group">
+          <label>Usage Limit</label>
+          <input type="number" formControlName="usageLimit" placeholder="Leave blank for unlimited" class="form-control">
+        </div>
+
+        <!-- Start Date -->
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" formControlName="startDate" class="form-control">
+        </div>
+
+        <!-- End Date -->
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" formControlName="endDate" class="form-control">
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+          <label>Status</label>
+          <select formControlName="status" class="form-control">
+            <option value="ACTIVE">Active</option>
+            <option value="INACTIVE">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group full-width">
+          <label>Description</label>
+          <textarea formControlName="description" rows="2" placeholder="Optional note about this coupon"
+            class="form-control"></textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="couponForm.invalid">
+          {{ isEditing ? 'Update Coupon' : 'Create Coupon' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()" *ngIf="isEditing">
+          Cancel
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ========== COUPON LIST TABLE ========== -->
+  <div class="card table-card">
+    <h3>📋 All Coupons ({{ coupons.length }})</h3>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Code</th>
+            <th>Type</th>
+            <th>Discount</th>
+            <th>Min Order</th>
+            <th>Usage</th>
+            <th>Valid Until</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of coupons; let i = index" [class.expired-row]="isExpired(c.endDate)">
+            <td>{{ i + 1 }}</td>
+            <td><span class="coupon-code">{{ c.code }}</span></td>
+            <td>
+              <span class="badge" [class.badge-percent]="c.discountType === 'PERCENTAGE'"
+                [class.badge-flat]="c.discountType === 'FLAT'">
+                {{ c.discountType === 'PERCENTAGE' ? '%' : '৳ Flat' }}
+              </span>
+            </td>
+            <td>
+              <strong>
+                {{ c.discountType === 'PERCENTAGE' ? c.discountValue + '%' : '৳' + c.discountValue }}
+              </strong>
+              <small *ngIf="c.maxDiscountAmount && c.discountType === 'PERCENTAGE'">
+                (max ৳{{ c.maxDiscountAmount }})
+              </small>
+            </td>
+            <td>{{ c.minOrderAmount ? '৳' + c.minOrderAmount : '—' }}</td>
+            <td>
+              {{ c.usedCount ?? 0 }} / {{ c.usageLimit ?? '∞' }}
+            </td>
+            <td>
+              <span [class.text-danger]="isExpired(c.endDate)">
+                {{ c.endDate ? (c.endDate | date:'dd MMM yyyy') : '—' }}
+                <small *ngIf="isExpired(c.endDate)">(Expired)</small>
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class.status-active]="c.status === 'ACTIVE'"
+                [class.status-inactive]="c.status !== 'ACTIVE'"
+                (click)="toggleStatus(c)" style="cursor:pointer" title="Click to toggle">
+                {{ c.status }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn btn-edit" (click)="onEdit(c)">✏️ Edit</button>
+              <button class="btn btn-delete" (click)="onDelete(c.id!)">🗑️ Delete</button>
+            </td>
+          </tr>
+          <tr *ngIf="coupons.length === 0">
+            <td colspan="9" class="empty-state">No coupons found. Create your first coupon above!</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,250 @@
+<app-site-header></app-site-header>
+
+<!-- Loading -->
+<div class="pd-loading" *ngIf="isLoading">
+  <div class="pd-skeleton">
+    <div class="skel-img"></div>
+    <div class="skel-info">
+      <div class="skel-line w60"></div>
+      <div class="skel-line w40"></div>
+      <div class="skel-line w80"></div>
+      <div class="skel-line w50"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Error -->
+<div class="pd-error" *ngIf="!isLoading && errorMsg">
+  <i class="fa-solid fa-box-open"></i>
+  <h2>{{ errorMsg }}</h2>
+  <button (click)="goBack()">Go Back</button>
+</div>
+
+<!-- Product -->
+<div class="pd-page" *ngIf="!isLoading && !errorMsg && product">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a (click)="goBack()"><i class="fa-solid fa-house"></i> Home</a>
+    <span>/</span>
+    <a (click)="goBack()">{{ product.category?.name || 'Products' }}</a>
+    <span>/</span>
+    <span>{{ product.name }}</span>
+  </nav>
+
+  <!-- Main grid -->
+  <div class="pd-grid">
+
+    <!-- Image -->
+    <div class="pd-img-col">
+      <div class="pd-img-wrap">
+        <img [src]="getImageUrl(product.image)"
+             [alt]="product.name"
+             (error)="img.src = PLACEHOLDER"
+             #img>
+        <span class="pd-sale-badge" *ngIf="product.isOnSale && product.salePrice">
+          -{{ discountPercent }}% OFF
+        </span>
+      </div>
+
+      <!-- Trust badges -->
+      <div class="trust-row">
+        <div class="trust-item">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Secure checkout</span>
+        </div>
+        <div class="trust-item">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>7-day return</span>
+        </div>
+        <div class="trust-item">
+          <i class="fa-solid fa-truck-fast"></i>
+          <span>Fast delivery</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="pd-info-col">
+
+      <!-- Category & SKU -->
+      <div class="pd-meta-row">
+        <span class="pd-category-tag" *ngIf="product.category?.name">
+          {{ product.category.name }}
+        </span>
+        <span class="pd-sku" *ngIf="product.sku">SKU: {{ product.sku }}</span>
+      </div>
+
+      <h1 class="pd-title">{{ product.name }}</h1>
+
+      <!-- Price -->
+      <div class="pd-price-wrap">
+        <ng-container *ngIf="product.isOnSale && product.salePrice && product.salePrice < product.price">
+          <span class="pd-price-old">৳{{ product.price | number:'1.0-0' }}</span>
+          <span class="pd-price-sale">৳{{ product.salePrice | number:'1.0-0' }}</span>
+          <span class="pd-discount-pill">Save ৳{{ (product.price - product.salePrice) | number:'1.0-0' }}</span>
+        </ng-container>
+        <ng-container *ngIf="!(product.isOnSale && product.salePrice && product.salePrice < product.price)">
+          <span class="pd-price">৳{{ product.price | number:'1.0-0' }}</span>
+        </ng-container>
+      </div>
+
+      <!-- Stock status -->
+      <div class="pd-stock" [class.in-stock]="inStock" [class.out-stock]="!inStock">
+        <i class="fa-solid" [class.fa-circle-check]="inStock" [class.fa-circle-xmark]="!inStock"></i>
+        {{ inStock ? product.stock + ' in stock' : 'Out of stock' }}
+      </div>
+
+      <!-- Pre-order badge -->
+      <div class="pd-preorder" *ngIf="product.preOrderAvailable">
+        <i class="fa-solid fa-clock"></i>
+        Pre-order available — estimated {{ product.estimatedProductionDays || '?' }} days production
+      </div>
+
+      <!-- Origin -->
+      <div class="pd-origin" *ngIf="product.originArea">
+        <i class="fa-solid fa-map-pin"></i>
+        Made in <strong>{{ product.originArea }}</strong>
+      </div>
+
+      <!-- Divider -->
+      <hr class="pd-divider">
+
+      <!-- Quantity + Cart -->
+      <div class="pd-actions" *ngIf="inStock || product.preOrderAvailable">
+        <div class="qty-wrap">
+          <button class="qty-btn" (click)="decreaseQty()" [disabled]="quantity <= 1">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <span class="qty-val">{{ quantity }}</span>
+          <button class="qty-btn" (click)="increaseQty()" [disabled]="quantity >= (product.stock || 1)">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+        <button class="pd-cart-btn" (click)="addToCart()">
+          <i class="fa-solid fa-cart-plus"></i>
+          Add to Cart
+        </button>
+        <button class="pd-wish-btn" [class.wishlisted]="isWishlisted()" (click)="toggleWishlist()">
+          <i class="fa-solid fa-heart"></i>
+        </button>
+      </div>
+
+      <div class="pd-outofstock-msg" *ngIf="!inStock && !product.preOrderAvailable">
+        <i class="fa-solid fa-circle-xmark"></i> This product is currently unavailable.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="pd-tabs">
+    <div class="tab-nav">
+      <button class="tab-btn" [class.active]="activeTab === 'description'" (click)="activeTab = 'description'">
+        Description
+      </button>
+      <button class="tab-btn" *ngIf="product.artisanStory" [class.active]="activeTab === 'artisan'" (click)="activeTab = 'artisan'">
+        <i class="fa-solid fa-person-digging"></i> Artisan Story
+      </button>
+      <button class="tab-btn" *ngIf="product.craftProcess" [class.active]="activeTab === 'craft'" (click)="activeTab = 'craft'">
+        <i class="fa-solid fa-hammer"></i> Craft Process
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'reviews'" (click)="activeTab = 'reviews'">
+        <i class="fa-solid fa-star"></i>
+        Reviews
+        <span class="tab-badge" *ngIf="reviewStats?.totalReviews">{{ reviewStats.totalReviews }}</span>
+      </button>
+    </div>
+
+    <div class="tab-body">
+      <div *ngIf="activeTab === 'description'">
+        <p class="pd-description" *ngIf="product.description">{{ product.description }}</p>
+        <p class="pd-no-desc" *ngIf="!product.description">No description available for this product.</p>
+        <table class="pd-detail-table">
+          <tr *ngIf="product.category?.name"><td class="dt-label">Category</td><td>{{ product.category.name }}</td></tr>
+          <tr *ngIf="product.brand?.name"><td class="dt-label">Brand</td><td>{{ product.brand.name }}</td></tr>
+          <tr *ngIf="product.sku"><td class="dt-label">SKU</td><td>{{ product.sku }}</td></tr>
+          <tr *ngIf="product.originArea"><td class="dt-label">Origin</td><td>{{ product.originArea }}</td></tr>
+          <tr *ngIf="product.estimatedProductionDays"><td class="dt-label">Production Time</td><td>{{ product.estimatedProductionDays }} days</td></tr>
+        </table>
+      </div>
+      <div *ngIf="activeTab === 'artisan'" class="tab-prose"><p>{{ product.artisanStory }}</p></div>
+      <div *ngIf="activeTab === 'craft'" class="tab-prose"><p>{{ product.craftProcess }}</p></div>
+
+      <!-- Reviews Tab -->
+      <div *ngIf="activeTab === 'reviews'" class="reviews-section">
+
+        <!-- Stats bar -->
+        <div class="rv-stats" *ngIf="reviewStats">
+          <div class="rv-avg">
+            <span class="rv-big-num">{{ reviewStats.averageRating || 0 }}</span>
+            <div class="rv-stars-row">
+              <i class="fa-solid fa-star" *ngFor="let s of getStars(reviewStats.averageRating || 0)" class="rv-star-filled"></i>
+            </div>
+            <span class="rv-total">{{ reviewStats.totalReviews }} reviews</span>
+          </div>
+          <div class="rv-dist" *ngIf="reviewStats.distribution">
+            <div class="rv-dist-row" *ngFor="let star of [5,4,3,2,1]">
+              <span class="rv-dist-label">{{ star }}</span>
+              <i class="fa-solid fa-star rv-dist-star"></i>
+              <div class="rv-dist-bar">
+                <div class="rv-dist-fill" [style.width.%]="reviewStats.totalReviews ? (reviewStats.distribution[star] / reviewStats.totalReviews) * 100 : 0"></div>
+              </div>
+              <span class="rv-dist-count">{{ reviewStats.distribution[star] || 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Write review form -->
+        <div class="rv-write">
+          <h3>Write a Review</h3>
+          <div class="rv-success" *ngIf="reviewSuccess"><i class="fa-solid fa-circle-check"></i> {{ reviewSuccess }}</div>
+          <div class="rv-error" *ngIf="reviewError"><i class="fa-solid fa-triangle-exclamation"></i> {{ reviewError }}</div>
+          <div class="rv-stars-input">
+            <i class="fa-solid fa-star rv-star-btn"
+               *ngFor="let s of [1,2,3,4,5]"
+               [class.active]="s <= (hoverRating || newRating)"
+               (mouseenter)="setHover(s)"
+               (mouseleave)="setHover(0)"
+               (click)="setRating(s)">
+            </i>
+          </div>
+          <textarea [(ngModel)]="newComment" rows="3" placeholder="Share your experience with this product..."></textarea>
+          <button class="rv-submit-btn" (click)="submitReview()" [disabled]="reviewSubmitting">
+            <i class="fa-solid fa-paper-plane"></i>
+            {{ reviewSubmitting ? 'Submitting...' : 'Submit Review' }}
+          </button>
+        </div>
+
+        <!-- Review list -->
+        <div class="rv-loading" *ngIf="reviewsLoading"><i class="fa-solid fa-spinner fa-spin"></i> Loading reviews...</div>
+        <div class="rv-list" *ngIf="!reviewsLoading">
+          <div class="rv-item" *ngFor="let r of reviews">
+            <div class="rv-item-header">
+              <div class="rv-avatar">{{ (r.customer?.username || 'A')[0].toUpperCase() }}</div>
+              <div class="rv-item-meta">
+                <div class="rv-item-name">{{ r.customer?.username || 'Anonymous' }}</div>
+                <div class="rv-item-date">{{ r.createdAt | date:'dd MMM yyyy' }}</div>
+              </div>
+              <div class="rv-item-stars">
+                <i class="fa-solid fa-star" *ngFor="let s of getStars(r.rating)" class="rv-star-filled"></i>
+              </div>
+            </div>
+            <p class="rv-item-comment" *ngIf="r.comment">{{ r.comment }}</p>
+          </div>
+          <div class="rv-empty" *ngIf="reviews.length === 0">
+            <i class="fa-regular fa-star"></i>
+            <p>No reviews yet. Be the first to review this product!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="pd-toast" [class.visible]="showToast">
+  <i class="fa-solid fa-circle-check"></i>
+  {{ toastMessage }}
+</div>

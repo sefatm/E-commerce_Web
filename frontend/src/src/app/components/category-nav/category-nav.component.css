@@ -1,0 +1,94 @@
+.category-nav-wrapper {
+  width: 100%;
+  margin: 26px 0 0;
+  padding: 22px 24px 24px;
+  background: #ffffff;
+  border: 1px solid #e7f1e9;
+  border-radius: 28px;
+  box-shadow: 0 18px 50px rgba(15, 62, 34, 0.07);
+}
+.cat-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+.section-kicker {
+  color: #0f8a3b;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-weight: 900;
+}
+.cat-heading h2 {
+  margin: 4px 0 0;
+  color: #102f1c;
+  font-size: 24px;
+  letter-spacing: -0.6px;
+}
+.view-all {
+  border: 0;
+  background: #f0fdf4;
+  color: #0d6e2d;
+  height: 40px;
+  padding: 0 15px;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.cat-scroll-container { overflow: hidden; }
+.cat-inner {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(130px, 1fr);
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+  cursor: grab;
+}
+.cat-inner.dragging { cursor: grabbing; }
+.cat-item {
+  border: 1px solid #e3efe6;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fffa 100%);
+  border-radius: 22px;
+  min-height: 118px;
+  padding: 15px 12px;
+  color: #163b24;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: center;
+  cursor: pointer;
+  transition: .22s ease;
+}
+.cat-item:hover,
+.cat-item.active {
+  transform: translateY(-4px);
+  border-color: #9be6b2;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+  box-shadow: 0 14px 30px rgba(15, 111, 45, 0.12);
+  color: #04702c;
+}
+.cat-icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: #f1faed;
+  font-size: 30px;
+}
+.cat-item.active .cat-icon { background: #dff9e6; }
+@media (max-width: 768px) {
+  .category-nav-wrapper { width: 100%; padding: 18px 16px; border-radius: 22px; }
+  .cat-heading h2 { font-size: 20px; }
+  .cat-inner { grid-auto-columns: 118px; }
+  .cat-item { min-height: 108px; }
+  .cat-icon { width: 54px; height: 54px; }
+}

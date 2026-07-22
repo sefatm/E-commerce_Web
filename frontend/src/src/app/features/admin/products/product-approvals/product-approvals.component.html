@@ -1,0 +1,206 @@
+<div class="approval-page">
+  <section class="approval-hero">
+    <div>
+      <span class="eyebrow">Catalog governance</span>
+      <h1>Product Approval Center</h1>
+      <p>{{ pageSubtitle() }}</p>
+    </div>
+    <div class="hero-actions">
+      <a routerLink="/admin/add" class="add-btn">+ Add Product</a>
+      <button class="refresh-btn" (click)="loadProducts()">Refresh</button>
+    </div>
+  </section>
+
+  <section class="summary-grid">
+    <button class="summary-card pending" [class.active]="activeTab === 'PENDING'" (click)="switchTab('PENDING')">
+      <span>Pending Review</span>
+      <strong>{{ counts.pending }}</strong>
+      <small>Waiting for admin decision</small>
+    </button>
+    <button class="summary-card approved" [class.active]="activeTab === 'APPROVED'" (click)="switchTab('APPROVED')">
+      <span>Approved Live</span>
+      <strong>{{ counts.approved }}</strong>
+      <small>Visible in customer catalog</small>
+    </button>
+    <button class="summary-card rejected" [class.active]="activeTab === 'REJECTED'" (click)="switchTab('REJECTED')">
+      <span>Rejected</span>
+      <strong>{{ counts.rejected }}</strong>
+      <small>Needs seller correction</small>
+    </button>
+  </section>
+
+  <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <section class="queue-shell">
+    <div class="queue-header">
+      <div>
+        <h2>{{ activeTab | titlecase }} Products</h2>
+        <p>Review product quality, seller ownership, stock, price and artisan story before publishing.</p>
+      </div>
+      <div class="queue-count">{{ products.length }} items</div>
+    </div>
+
+    <div class="loading" *ngIf="isLoading">Loading approval queue...</div>
+
+    <div class="empty-state" *ngIf="!isLoading && products.length === 0">
+      <div class="empty-icon">+</div>
+      <strong>{{ emptyMessage() }}</strong>
+      <p>New seller products will stay here until admin approves them.</p>
+      <a routerLink="/admin/add" *ngIf="activeTab === 'PENDING'">Create product</a>
+    </div>
+
+    <div class="approval-table" *ngIf="!isLoading && products.length > 0">
+      <div class="table-head">
+        <span>Product</span>
+        <span>Seller</span>
+        <span>Catalog</span>
+        <span>Stock</span>
+        <span>Quality</span>
+        <span>Status</span>
+        <span>Action</span>
+      </div>
+
+      <article class="table-row" *ngFor="let product of products">
+        <div class="product-cell">
+          <img [src]="imageUrl(product)" [alt]="product.name">
+          <div>
+            <strong>{{ product.name }}</strong>
+            <small>SKU: {{ product.sku || 'Not set' }}</small>
+            <small class="muted">{{ product.originArea || 'Origin not set' }}</small>
+          </div>
+        </div>
+
+        <div class="seller-cell">
+          <strong>{{ sellerName(product) }}</strong>
+          <small>{{ sellerLocation(product) }}</small>
+        </div>
+
+        <div class="catalog-cell">
+          <strong>{{ product.category?.name || 'Uncategorized' }}</strong>
+          <small>{{ product.brand?.name || 'Brand not set' }}</small>
+        </div>
+
+        <div class="stock-cell">
+          <strong>{{ stockLabel(product) }}</strong>
+          <small>&#x09F3;{{ product.price || 0 }}</small>
+        </div>
+
+        <div class="quality-cell">
+          <div class="score-bar">
+            <span [style.width.%]="productReadiness(product)"></span>
+          </div>
+          <small>{{ productReadiness(product) }}% - {{ reviewPriority(product) }}</small>
+        </div>
+
+        <div>
+          <span class="status" [ngClass]="statusClass(product)">
+            {{ productStatus(product) }}
+          </span>
+        </div>
+
+        <div class="row-actions">
+          <button class="review-btn" (click)="openReview(product)">Review</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <div class="review-backdrop" *ngIf="selectedProduct" (click)="closeReview()">
+    <aside class="review-modal" (click)="$event.stopPropagation()">
+      <div class="review-head">
+        <div>
+          <span class="eyebrow">Admin decision workspace</span>
+          <h2>{{ selectedProduct.name }}</h2>
+          <p>{{ selectedProduct.category?.name || 'Uncategorized' }} / {{ selectedProduct.originArea || 'Area not set' }}</p>
+        </div>
+        <button class="close-btn" (click)="closeReview()">x</button>
+      </div>
+
+      <div class="review-body" [class.pending-review]="isPending(selectedProduct)">
+        <div class="image-panel">
+          <img [src]="imageUrl(selectedProduct)" [alt]="selectedProduct.name">
+          <div class="status-strip">
+            <span [ngClass]="statusClass(selectedProduct)">{{ productStatus(selectedProduct) }}</span>
+            <strong>{{ stockLabel(selectedProduct) }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-panel">
+          <div class="metric-row">
+            <div class="metric">
+              <span>Regular Price</span>
+              <strong>&#x09F3;{{ selectedProduct.price || 0 }}</strong>
+            </div>
+            <div class="metric">
+              <span>Sale Price</span>
+              <strong>{{ selectedProduct.salePrice ? ('Tk ' + selectedProduct.salePrice) : 'Not set' }}</strong>
+            </div>
+            <div class="metric">
+              <span>Readiness</span>
+              <strong>{{ productReadiness(selectedProduct) }}%</strong>
+            </div>
+          </div>
+
+          <div class="quick-decision" *ngIf="isPending(selectedProduct)">
+            <div>
+              <strong>Ready for catalog decision</strong>
+              <span>Approve to publish this product, or write a reason before rejecting.</span>
+            </div>
+            <button class="approve-btn compact" (click)="approve(selectedProduct.id)" [disabled]="isSubmitting">
+              Approve Product
+            </button>
+          </div>
+
+          <div class="info-grid">
+            <div><span>Seller / Artisan</span><strong>{{ sellerName(selectedProduct) }}</strong></div>
+            <div><span>Seller Location</span><strong>{{ sellerLocation(selectedProduct) }}</strong></div>
+            <div><span>Brand</span><strong>{{ selectedProduct.brand?.name || 'Not set' }}</strong></div>
+            <div><span>SKU</span><strong>{{ selectedProduct.sku || 'Not set' }}</strong></div>
+            <div><span>Product Status</span><strong>{{ selectedProduct.status || 'active' }}</strong></div>
+            <div><span>Pre-order</span><strong>{{ selectedProduct.preOrderAvailable ? ((selectedProduct.estimatedProductionDays || 0) + ' days') : 'No' }}</strong></div>
+          </div>
+
+          <div class="review-section">
+            <h3>Description</h3>
+            <p>{{ selectedProduct.description || 'No description provided.' }}</p>
+          </div>
+
+          <div class="review-section">
+            <h3>Artisan Story</h3>
+            <p>{{ selectedProduct.artisanStory || 'No artisan story provided.' }}</p>
+          </div>
+
+          <div class="review-section">
+            <h3>Craft Process</h3>
+            <p>{{ selectedProduct.craftProcess || 'No craft process provided.' }}</p>
+          </div>
+
+          <div class="decision-box" *ngIf="isPending(selectedProduct)">
+            <label>Reject reason</label>
+            <textarea
+              [(ngModel)]="rejectReason"
+              rows="3"
+              placeholder="Write the reason if this product is incomplete, unauthentic, or needs correction.">
+            </textarea>
+            <small class="decision-error" *ngIf="decisionError">{{ decisionError }}</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-actions decision-actions" *ngIf="isPending(selectedProduct)">
+        <span>Pending admin decision</span>
+        <button class="reject-btn" (click)="reject(selectedProduct.id)" [disabled]="isSubmitting">
+          Reject Product
+        </button>
+        <button class="approve-btn" (click)="approve(selectedProduct.id)" [disabled]="isSubmitting">
+          Approve Product
+        </button>
+      </div>
+
+      <div class="review-actions" *ngIf="!isPending(selectedProduct)">
+        <button class="review-btn" (click)="closeReview()">Close Review</button>
+      </div>
+    </aside>
+  </div>
+</div>

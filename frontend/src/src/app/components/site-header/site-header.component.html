@@ -1,0 +1,99 @@
+<header class="rm-header">
+  <div class="rm-topbar">
+    <span>🚚 Free delivery over ৳2,000</span>
+    <span>🌿 Fresh rural products</span>
+    <span>📍 Dhaka, Bangladesh</span>
+  </div>
+
+  <div class="rm-mainbar">
+    <button class="brand-wrap" type="button" (click)="router.navigateByUrl('/')" aria-label="Rural Mart Home">
+      <span class="brand-mark"><span>RM</span></span>
+      <span class="brand-text">
+        <strong>Rural<span>Mart</span></strong>
+        <small>From rural roots, for better life</small>
+      </span>
+    </button>
+
+    <div class="category-menu-wrap">
+      <button class="category-pill" type="button" (click)="toggleCategoryMenu($event)" [attr.aria-expanded]="showCategoryMenu">
+        <span class="pill-icon">▦</span>
+        Categories
+        <span class="pill-arrow" [class.open]="showCategoryMenu">⌄</span>
+      </button>
+
+      <div class="category-dropdown" *ngIf="showCategoryMenu" (click)="$event.stopPropagation()">
+        <button type="button" class="category-option all-option" [class.active]="activeCategoryId === 'all'" (click)="chooseCategory('all')">
+          <span>▦</span><b>All Products</b>
+        </button>
+        <button type="button" class="category-option" *ngFor="let category of categories"
+          [class.active]="activeCategoryId == (category.id ?? category._id ?? category.categoryId)"
+          (click)="chooseCategory(category)">
+          <span>{{ categoryIcon(category) }}</span>
+          <b>{{ category.name }}</b>
+        </button>
+      </div>
+    </div>
+
+    <div class="search-shell">
+      <input
+        #searchInput
+        type="text"
+        placeholder="Search rice, tomato, honey, handmade products..."
+        (input)="onSearchInput($event)"
+        (keyup.enter)="onSearchClick(searchInput.value)"
+      />
+      <button type="button" aria-label="Search" (click)="onSearchClick(searchInput.value)">⌕</button>
+    </div>
+
+    <nav class="quick-actions" aria-label="Main navigation">
+      <button class="quick-action" type="button" routerLink="/offers" routerLinkActive="active-link">
+        <span class="qa-icon">%</span>
+        <span>Offers</span>
+      </button>
+
+      <button class="quick-action" type="button" routerLink="/my-orders" routerLinkActive="active-link">
+        <span class="qa-icon">□</span>
+        <span>Orders</span>
+      </button>
+
+      <button class="quick-action badge-wrap" type="button" routerLink="/wishlist" routerLinkActive="active-link">
+        <span class="qa-icon">♡</span>
+        <span>Wishlist</span>
+        <b *ngIf="wishlistCount > 0">{{ wishlistCount }}</b>
+      </button>
+
+      <button class="quick-action badge-wrap" type="button" (click)="openCart()">
+        <span class="qa-icon">🛒</span>
+        <span>Cart</span>
+        <b *ngIf="cartCount > 0">{{ cartCount }}</b>
+      </button>
+
+      <button class="quick-action" type="button" *ngIf="!isLoggedIn" (click)="goToLogin()">
+        <span class="qa-icon">👤</span>
+        <span>Login</span>
+      </button>
+
+      <button class="seller-btn" type="button" routerLink="/seller/apply" routerLinkActive="active-link" *ngIf="!isLoggedIn || !isSeller">
+        Apply for Seller
+      </button>
+
+      <div class="user-menu-wrap" *ngIf="isLoggedIn" (click)="toggleUserMenu()">
+        <span class="mini-avatar">
+          <img *ngIf="userPhoto" [src]="userPhoto" alt="Profile">
+          <span *ngIf="!userPhoto">{{ userInitial() }}</span>
+        </span>
+        <span class="user-name-label">{{ userName }}</span>
+        <span class="dropdown-arrow">⌄</span>
+
+        <div class="user-dropdown" *ngIf="showUserMenu" (click)="$event.stopPropagation()">
+          <div class="ud-name">{{ userName }}</div>
+          <div class="ud-divider"></div>
+          <div class="ud-item" (click)="router.navigateByUrl('/profile'); showUserMenu=false">Profile Settings</div>
+          <div class="ud-item" *ngIf="isSeller" (click)="router.navigateByUrl('/seller/dashboard'); showUserMenu=false">Seller Dashboard</div>
+          <div class="ud-item" *ngIf="isAdmin" (click)="router.navigateByUrl('/admin/dashboard'); showUserMenu=false">Admin Dashboard</div>
+          <div class="ud-item danger" (click)="logout()">Logout</div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,79 @@
+<app-site-header></app-site-header>
+
+<div class="seller-apply-page">
+  <section class="apply-shell">
+    <div class="apply-intro">
+      <p class="eyebrow">Seller onboarding</p>
+      <h1>Apply as a Rural Mart seller</h1>
+      <p>Share your craft, origin, and process. Admin approval is required before products become public.</p>
+    </div>
+
+    <form class="apply-form" [formGroup]="sellerForm" (ngSubmit)="submit()">
+      <div class="alert success" *ngIf="successMsg">{{ successMsg }}</div>
+      <div class="alert error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+      <div class="form-grid">
+        <label>
+          <span>Full name</span>
+          <input formControlName="name" type="text">
+          <small *ngIf="submitted && f['name'].errors">Name is required.</small>
+        </label>
+
+        <label>
+          <span>Shop name</span>
+          <input formControlName="shopName" type="text">
+          <small *ngIf="submitted && f['shopName'].errors">Shop name is required.</small>
+        </label>
+
+        <label>
+          <span>Email</span>
+          <input formControlName="email" type="email">
+          <small *ngIf="submitted && f['email'].errors">Valid email is required.</small>
+        </label>
+
+        <label>
+          <span>Phone</span>
+          <input formControlName="phone" type="text">
+          <small *ngIf="submitted && f['phone'].errors">Phone is required.</small>
+        </label>
+
+        <label>
+          <span>NID number</span>
+          <input formControlName="nidNo" type="text">
+          <small *ngIf="submitted && f['nidNo'].errors">NID is required.</small>
+        </label>
+
+        <label>
+          <span>District / area</span>
+          <input formControlName="district" type="text">
+          <small *ngIf="submitted && f['district'].errors">District is required.</small>
+        </label>
+
+        <label class="full">
+          <span>Address</span>
+          <input formControlName="address" type="text">
+          <small *ngIf="submitted && f['address'].errors">Address is required.</small>
+        </label>
+
+        <label class="full">
+          <span>Artisan story</span>
+          <textarea formControlName="artisanStory" rows="4"></textarea>
+          <small *ngIf="submitted && f['artisanStory'].errors">Write at least 20 characters.</small>
+        </label>
+
+        <label class="full">
+          <span>Craft process</span>
+          <textarea formControlName="craftProcess" rows="4"></textarea>
+          <small *ngIf="submitted && f['craftProcess'].errors">Write at least 20 characters.</small>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="ghost-btn" routerLink="/">Cancel</button>
+        <button type="submit" class="submit-btn" [disabled]="isLoading">
+          {{ isLoading ? 'Submitting...' : 'Submit Application' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

@@ -1,0 +1,91 @@
+<div class="order-page">
+
+  <div class="page-header">
+    <div>
+      <h2>Order Management</h2>
+      <p>{{ filteredOrders.length }} orders found</p>
+    </div>
+  </div>
+
+  <div class="alert-success" *ngIf="successMsg">{{ successMsg }}</div>
+  <div class="alert-error" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+  <div class="filter-bar">
+    <div class="search-box">
+      <span class="search-icon">Search</span>
+      <input type="text" placeholder="Search by name, phone or order code..."
+        [(ngModel)]="searchKeyword" (input)="onSearch()">
+    </div>
+    <div class="status-tabs">
+      <button *ngFor="let s of statusList"
+        [class.active]="selectedStatus === s"
+        (click)="onStatusFilter(s)">
+        {{ s }}
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">Loading orders...</div>
+
+  <div class="table-card" *ngIf="!isLoading">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Order Code</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Payment</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let o of filteredOrders; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td><span class="order-code">{{ o.orderCode }}</span></td>
+            <td><strong>{{ o.customerName }}</strong></td>
+            <td>{{ o.customerPhone }}</td>
+            <td>{{ o.items?.length || 0 }} items</td>
+            <td><strong>&#x09F3;{{ o.totalAmount | number:'1.0-0' }}</strong></td>
+            <td>
+              <span
+                class="pay-badge"
+                [class.paid]="o.paymentStatus === 'PAID' || o.paymentStatus === 'REFUNDED'"
+                [class.unpaid]="o.paymentStatus !== 'PAID' && o.paymentStatus !== 'REFUNDED'">
+                {{ o.paymentStatus }}
+              </span>
+            </td>
+            <td>{{ o.orderDate | date:'dd MMM yy' }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(o.status!)">
+                {{ o.status }}
+              </span>
+            </td>
+            <td class="actions">
+              <button class="btn-icon btn-view" title="View Details" (click)="viewDetails(o.id!)">View</button>
+              <button class="btn-icon btn-track" title="Track" (click)="trackOrder(o.id!)">Track</button>
+              <button class="btn-icon btn-next" *ngIf="getNextStatus(o.status!)"
+                [title]="'Mark as ' + getNextStatus(o.status!)"
+                (click)="updateStatus(o.id!, getNextStatus(o.status!))">
+                Next
+              </button>
+              <button class="btn-icon btn-cancel" title="Cancel"
+                *ngIf="o.status !== 'DELIVERED' && o.status !== 'CANCELLED'"
+                (click)="updateStatus(o.id!, 'CANCELLED')">Cancel</button>
+              <button class="btn-icon btn-delete" title="Delete" (click)="deleteOrder(o.id!)">Delete</button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredOrders.length === 0">
+            <td colspan="10" class="empty">No orders found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,284 @@
+.seller-dashboard {
+  min-height: 100%;
+  padding: 24px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.page-header,
+.section-head,
+.seller-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: #111827;
+}
+
+h1 {
+  font-size: 28px;
+  letter-spacing: 0;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+.page-header p,
+.seller-card p {
+  margin: 6px 0 0;
+  color: #6b7280;
+}
+
+.seller-select,
+.status-select {
+  border: 1px solid #d8dde6;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: #fff;
+  color: #1f2937;
+}
+
+.seller-select {
+  min-width: 240px;
+  border-color: #bbf7d0;
+  box-shadow: 0 8px 24px rgba(4, 120, 87, 0.08);
+}
+
+.alert,
+.loading,
+.empty-state {
+  padding: 13px 15px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.alert.error {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.alert.success {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.loading,
+.empty-state {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  color: #6b7280;
+}
+
+.seller-card {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 244, 0.92)),
+    #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 18px 0;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.06);
+}
+
+.badge {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.seller-meta {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.seller-contact {
+  display: grid;
+  gap: 5px;
+  color: #475569;
+  font-size: 13px;
+}
+
+.seller-meta span,
+.stat-card span {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.seller-meta strong {
+  color: #111827;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e8edf2;
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.04);
+  border-top: 3px solid #10b981;
+}
+
+.stat-card strong {
+  color: #111827;
+  font-size: 22px;
+}
+
+.dashboard-section {
+  margin-top: 22px;
+}
+
+.section-head {
+  margin-bottom: 12px;
+}
+
+.section-head a {
+  color: #047857;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.section-note {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.table-card {
+  background: #fff;
+  border: 1px solid #e8edf2;
+  border-radius: 12px;
+  overflow: auto;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.05);
+}
+
+.withdraw-form {
+  display: grid;
+  grid-template-columns: 140px 160px 1fr 1fr auto auto;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.withdraw-form input,
+.withdraw-form select {
+  border: 1px solid #d8dde6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #1f2937;
+}
+
+.withdraw-form button {
+  border: none;
+  border-radius: 8px;
+  background: #047857;
+  color: #fff;
+  font-weight: 800;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.withdraw-form button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.withdraw-note {
+  align-self: center;
+  color: #64748b;
+  font-weight: 700;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef0f3;
+  text-align: left;
+  color: #374151;
+  font-size: 13px;
+}
+
+th {
+  background: #f8fafc;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+tbody tr:hover td {
+  background: #fbfdfc;
+}
+
+.pill {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.pill.ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.pill.warn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pill.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+small {
+  color: #6b7280;
+}
+
+@media (max-width: 720px) {
+  .page-header,
+  .seller-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .seller-meta {
+    text-align: left;
+  }
+
+  .seller-select {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .withdraw-form {
+    grid-template-columns: 1fr;
+  }
+}

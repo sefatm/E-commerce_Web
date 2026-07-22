@@ -1,0 +1,54 @@
+<app-site-header></app-site-header>
+
+<main class="wishlist-page">
+  <section class="wishlist-shell">
+    <div class="page-head">
+      <div>
+        <p class="eyebrow">Saved products</p>
+        <h1>My Wishlist</h1>
+      </div>
+      <button type="button" routerLink="/">Continue Shopping</button>
+    </div>
+
+    <div class="message" *ngIf="message">{{ message }}</div>
+    <div class="loading" *ngIf="isLoading">Loading wishlist...</div>
+
+    <div class="empty" *ngIf="!isLoading && items.length === 0">
+      <h2>No saved products yet</h2>
+      <p>Save handmade products from the marketplace and come back to them later.</p>
+      <button type="button" routerLink="/">Browse Products</button>
+    </div>
+
+    <div class="wishlist-grid" *ngIf="!isLoading && items.length > 0">
+      <article class="wish-card" *ngFor="let item of items">
+        <img
+          [src]="imageUrl(productOf(item)?.image)"
+          [alt]="productOf(item)?.name || 'Saved product'"
+          (error)="img.src = placeholder"
+          #img>
+
+        <div class="wish-body">
+          <div>
+            <h2>{{ productOf(item)?.name || 'Product unavailable' }}</h2>
+            <p>{{ productOf(item)?.originArea || productOf(item)?.description || 'This saved product may have been removed or is temporarily unavailable.' }}</p>
+          </div>
+
+          <div class="wish-meta">
+            <strong *ngIf="productOf(item)">&#x09F3;{{ productOf(item)?.salePrice || productOf(item)?.price | number:'1.0-0' }}</strong>
+            <strong *ngIf="!productOf(item)">Unavailable</strong>
+            <span *ngIf="productOf(item)?.preOrderAvailable">Pre-order</span>
+          </div>
+
+          <div class="wish-actions">
+            <button type="button" class="cart-btn" [disabled]="!productOf(item)" (click)="moveToCart(item)">
+              Move to Cart
+            </button>
+            <button type="button" class="remove-btn" (click)="removeItem(item)">
+              Remove
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>

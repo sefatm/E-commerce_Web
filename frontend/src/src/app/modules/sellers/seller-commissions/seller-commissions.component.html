@@ -1,0 +1,134 @@
+<div class="sc-page">
+
+  <div class="sc-header">
+    <div>
+      <h1><i class="fa-solid fa-circle-dollar-to-slot"></i> My Commissions</h1>
+      <p>Your earnings breakdown and withdrawal requests.</p>
+    </div>
+    <button class="btn-withdraw" (click)="showWithdrawForm = !showWithdrawForm"
+            *ngIf="availableBalance > 0">
+      <i class="fa-solid fa-money-bill-transfer"></i>
+      Request Withdrawal
+    </button>
+  </div>
+
+  <!-- Summary cards -->
+  <div class="sc-summary" *ngIf="summary">
+    <div class="sum-card">
+      <div class="sum-label">Total Earned</div>
+      <div class="sum-val">৳{{ (summary.totalEarned || 0) | number:'1.0-0' }}</div>
+    </div>
+    <div class="sum-card highlight">
+      <div class="sum-label">Available to Withdraw</div>
+      <div class="sum-val">৳{{ availableBalance | number:'1.0-0' }}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Platform Commission</div>
+      <div class="sum-val">৳{{ (summary.totalCommission || 0) | number:'1.0-0' }}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">Paid Out</div>
+      <div class="sum-val">৳{{ (summary.totalPaid || 0) | number:'1.0-0' }}</div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="sc-success" *ngIf="withdrawSuccess">
+    <i class="fa-solid fa-circle-check"></i> {{ withdrawSuccess }}
+  </div>
+  <div class="sc-error" *ngIf="errorMsg">
+    <i class="fa-solid fa-triangle-exclamation"></i> {{ errorMsg }}
+  </div>
+
+  <!-- Withdraw form -->
+  <div class="sc-withdraw-form" *ngIf="showWithdrawForm">
+    <h2>Request Withdrawal</h2>
+    <div class="wf-error" *ngIf="withdrawError">{{ withdrawError }}</div>
+    <div class="wf-grid">
+      <div class="wf-field">
+        <label>Amount (৳)</label>
+        <input type="number" [(ngModel)]="withdrawForm.amount"
+               [max]="availableBalance" placeholder="Enter amount" min="1">
+        <span class="wf-hint">Available: ৳{{ availableBalance | number:'1.0-0' }}</span>
+      </div>
+      <div class="wf-field">
+        <label>Payment Method</label>
+        <select [(ngModel)]="withdrawForm.paymentMethod">
+          <option value="bkash">bKash</option>
+          <option value="nagad">Nagad</option>
+          <option value="rocket">Rocket</option>
+          <option value="bank">Bank Transfer</option>
+        </select>
+      </div>
+      <div class="wf-field">
+        <label>Account Name</label>
+        <input type="text" [(ngModel)]="withdrawForm.accountName" placeholder="Account holder name">
+      </div>
+      <div class="wf-field">
+        <label>Account Number</label>
+        <input type="text" [(ngModel)]="withdrawForm.accountNumber" placeholder="Mobile / account number">
+      </div>
+      <div class="wf-field full">
+        <label>Note (optional)</label>
+        <input type="text" [(ngModel)]="withdrawForm.note" placeholder="Any note for admin">
+      </div>
+    </div>
+    <div class="wf-actions">
+      <button class="btn-submit" (click)="submitWithdraw()">
+        <i class="fa-solid fa-paper-plane"></i> Submit Request
+      </button>
+      <button class="btn-cancel" (click)="showWithdrawForm = false">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Commission table -->
+  <div class="sc-table-wrap">
+    <div class="sc-table-header">
+      <span class="sc-count">{{ filtered.length }} records</span>
+      <select [(ngModel)]="statusFilter" (change)="applyFilter()">
+        <option value="all">All Status</option>
+        <option value="PENDING">Pending</option>
+        <option value="PAYABLE">Payable</option>
+        <option value="PAID">Paid</option>
+      </select>
+    </div>
+
+    <div class="sc-loading" *ngIf="isLoading">
+      <i class="fa-solid fa-spinner fa-spin"></i> Loading commissions...
+    </div>
+
+    <table class="sc-table" *ngIf="!isLoading">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Order Amount</th>
+          <th>Commission Rate</th>
+          <th>Commission</th>
+          <th>Your Earning</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of filtered">
+          <td>
+            <span class="order-code">{{ c.orderCode || c.order?.orderCode || '—' }}</span>
+          </td>
+          <td>৳{{ (c.orderAmount || c.grossAmount || 0) | number:'1.0-0' }}</td>
+          <td>{{ (c.commissionRate || 0) }}%</td>
+          <td class="text-red">৳{{ (c.commissionAmount || 0) | number:'1.0-0' }}</td>
+          <td class="text-green"><strong>৳{{ (c.sellerEarning || c.netAmount || 0) | number:'1.0-0' }}</strong></td>
+          <td><span class="badge" [ngClass]="statusClass(c.status)">{{ c.status }}</span></td>
+          <td>{{ (c.createdAt || c.orderDate) | date:'dd MMM yy' }}</td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="7" class="empty-row">
+            <i class="fa-solid fa-inbox"></i>
+            No commission records found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
